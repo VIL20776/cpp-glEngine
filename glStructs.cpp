@@ -1,12 +1,12 @@
+/*
+    Structures used by glRender2D and glRender3D
+*/
 #include <cstdint>
 #include <vector>
 
-using namespace std;
-
 using u_char = unsigned char;
 
-// BMP Structs
-
+// BMP Format Structs
 #pragma pack(push, 1)
 struct BMPHeader {
     u_char signature [2];
@@ -44,3 +44,8 @@ struct ViewPort {
     uint32_t height;
 };
 
+struct Triangle {
+    std::vector<float> v0;
+    std::vector<float> v1;
+    std::vector<float> v2;
+};

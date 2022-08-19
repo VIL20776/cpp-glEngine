@@ -2,25 +2,20 @@
 #include <stdio.h>
 #include <stdexcept>
 #include <vector>
+#include <array>
 
-template<class T>
+template<class T, size_t rows, size_t columns>
 class Matrix {
-    using matrix = std::vector<std::vector<T>>;
+    using matrix = std::array<std::array<T, columns>, rows>;
 
     private:
-        const size_t rows;
-        const size_t columns;
         matrix data;
 
     public:
-        Matrix(size_t rows, size_t columns, bool identity=false)
+        Matrix(bool identity=false)
         {
-            this->rows = rows;
-            this->columns = columns;
-
-            for (int i = 0; i < rows; i++) {
-                std::vector<T> row (columns, 0);
-                data.push_back(row);
+            for (auto &row: data) {
+                row.fill(0);
             }
 
             if (identity) {
@@ -30,22 +25,21 @@ class Matrix {
             }
         }
 
-        Matrix(size_t rows, size_t columns, matrix data)
+        Matrix(matrix data)
         {
-            this->rows = rows;
-            this->columns = columns;
             this->data = data;
         }
 
-        Matrix operator * (Matrix<T> const &m)
+        template<size_t m_rows, size_t m_columns>
+        Matrix operator * (Matrix<T, m_rows, m_columns> const &m)
         {
-            if (columns != m.rows) {
+            if (columns != m_rows) {
                 throw std::invalid_argument("Size of rows from m does not match the matrix number of columns.");
             }
 
-            matrix result = Matrix<T> (rows, m.columns);
+            matrix result = Matrix<T, rows, m_columns> ();
             
-            for (size_t i = 0; i < m.columns; i++) {
+            for (size_t i = 0; i < m_columns; i++) {
                 for (size_t y = 0; y < rows; y++) {
                     T value;
                     for (size_t x = 0; y < columns; x++) {
@@ -58,28 +52,24 @@ class Matrix {
             return result;
         }
 
-        std::vector<T> operator * (std::vector<T> const &v)
+        template<size_t size>
+        std::array<T, size> operator * (std::array<T, size> const &v)
         {
             if (columns != v.size()) {
                 throw std::invalid_argument("Size of v does not match the matrix number of columns.");
             }
 
-            std::vector<T> result;
+            std::array<T, size> result {};
             
-            for (auto &row: data) {
+            for (size_t y = 0; y < rows; y++) {
                 T value;
-                for (size_t i = 0; i < columns; i++) {
-                    value += row.at(i) * v.at(i);
+                for (size_t x = 0; x < columns; x++) {
+                    value += data[y][x] * v.at(x);
                 }
-                result.push_back(value);
+                result[y] = value;
             }
 
             return result;
-        }
-
-
-        size_t getColumns () {
-            return columns;
         }
 };
 

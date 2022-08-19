@@ -27,7 +27,7 @@ class GlBmp {
         // Utilities
         ViewPort viewport;
         
-        // Functions
+        // Aux Functions
         bool evenOdd(uint32_t x, uint32_t y, float poly [][2], size_t num) {
             uint32_t j = num - 1;
             bool c = false;

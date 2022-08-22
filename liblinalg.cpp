@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstddef>
 #include <stdio.h>
 #include <stdexcept>
@@ -74,17 +75,47 @@ class Matrix {
 };
 
 template<class T>
-class Vector{
-    private:
-    std::vector<T> v;
-
-    public:
-    std::vector<T> operator - (std::vector<T> v)
-    {
-        std::vector<T> result{};
-        for (int i = 0; i < v.size(); i++) {
-            result.push_back(this->v.at(i) - v.at(i));
-        }
-        return result;
+std::vector<T> substract (const std::vector<T> v0, const std::vector<T> v1)
+{
+    std::vector<T> result {};
+    for (int i = 0; i < v0.size(); i++) {
+        result.push_back(v0.at(i) - v1.at(i));
     }
-};
+    return result;
+}
+
+template<class T>
+std::vector<T> divide (const std::vector<T> v0, const std::vector<T> v1)
+{
+    std::vector<T> result {};
+    for (int i = 0; i < v0.size(); i++) {
+        result.push_back(v0.at(i) / v1.at(i));
+    }
+    return result;
+}
+
+template<class T>
+std::vector<T> cross (const std::vector<T> v0, const std::vector<T> v1)
+{
+    T x = (v0.at(1) * v1.at(2)) - (v0.at(2) * v1.at(1));
+    T y = (v0.at(0) * v1.at(2)) - (v0.at(2) * v1.at(0));
+    T z = (v0.at(0) * v1.at(1)) - (v0.at(1) * v1.at(0));
+
+    return {x, y, z};
+}
+
+std::vector<float> normalize (const std::vector<float> v)
+{
+    float magnitude {};
+    for (auto &i: v)
+    {
+        magnitude += std::pow(i, 2);
+    }
+    
+    std::vector<float> result {};
+    for (auto &i : v) {
+        result.push_back(i / magnitude);
+    }
+
+    return result;
+}

@@ -44,7 +44,7 @@ struct ViewPort {
     uint32_t height;
 };
 
-struct Triangle {
+struct ObjFaceVec{
     std::vector<float> v0;
     std::vector<float> v1;
     std::vector<float> v2;

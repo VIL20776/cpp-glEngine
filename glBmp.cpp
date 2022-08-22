@@ -13,7 +13,7 @@
 using namespace std;
 
 class GlBmp {
-    private:
+    protected:
         // BMP components
         BMPHeader header;
         BMPInfoHeader info;

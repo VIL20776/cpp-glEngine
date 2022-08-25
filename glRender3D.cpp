@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <vector>
+#include <unordered_map>
 
 #include "liblinalg.cpp"
 #include "glObj.cpp"
@@ -14,7 +15,8 @@ class GlRender3D: public GlBmp
     private:
     // 3D rendering components
     vector<float> zbuffer;
-
+    Texture texture;
+    DirLight dirLight;
 
     // Functions
     array<float, 3> baryCoords (array<float, 3> A, array<float, 3> B, array<float, 3> C, array<float, 2> P)
@@ -141,6 +143,28 @@ class GlRender3D: public GlBmp
                             if (z < zbuffer[y * info.width + x] && abs(z) < 1) {
                                 zbuffer[y * info.width + x] = z;
 
+                                std::unordered_map<string, float> shader_args {};
+                                std::unordered_map<string, vector<float>> shader_vec_args {};
+
+                                shader_args["bCoord_u"] = bCoords.at(0);
+                                shader_args["bCoord_v"] = bCoords.at(1);
+                                shader_args["bCoord_w"] = bCoords.at(2);
+
+                                shader_args["vColor_r"] = point.R;
+                                shader_args["vColor_g"] = point.G;
+                                shader_args["vColor_b"] = point.B;
+
+                                shader_vec_args["texCoords_v0"] = texCoords.v0;
+                                shader_vec_args["texCoords_v1"] = texCoords.v1;
+                                shader_vec_args["texCoords_v2"] = texCoords.v2;
+
+                                shader_vec_args["normals_v0"] = normals.v0;
+                                shader_vec_args["normals_v1"] = normals.v1;
+                                shader_vec_args["normals_v2"] = normals.v2;
+
+                                shader_vec_args["triangleNormal"] = triangleNormal;
+                                shader_vec_args["tangent"] = tangent;
+                                shader_vec_args["bitangent"] = bitangent;
                                 //shader
                             }
                         }

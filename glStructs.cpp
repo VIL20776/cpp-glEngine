@@ -37,6 +37,12 @@ struct Color {
     u_char B;
 };
 
+struct DirLight {
+    float x;
+    float y;
+    float z;
+};
+
 struct ViewPort {
     uint32_t x;
     uint32_t y;

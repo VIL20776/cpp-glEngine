@@ -10,7 +10,7 @@ class Texture {
     std::vector<Color> data;
     
     public:
-    void read(const char *fname) {
+    Texture (const char *fname) {
         std::ifstream inp{ fname, std::ios_base::binary };
         if (inp) {
             inp.read((char*)&header, sizeof(header));

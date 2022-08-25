@@ -8,7 +8,7 @@
 #include <vector>
 
 
-#include "glStructs.cpp"
+#include "glTextures.cpp"
 
 using namespace std;
 

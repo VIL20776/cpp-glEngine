@@ -1,3 +1,6 @@
+#ifndef LIBLINALG_H
+#define LIBLINALG_H
+
 #include <cmath>
 #include <cstddef>
 #include <stdio.h>
@@ -38,7 +41,7 @@ class Matrix {
                 throw std::invalid_argument("Size of rows from m does not match the matrix number of columns.");
             }
 
-            matrix result = Matrix<T, rows, m_columns> ();
+            Matrix result = Matrix<T, rows, m_columns> ();
             
             for (size_t i = 0; i < m_columns; i++) {
                 for (size_t y = 0; y < rows; y++) {
@@ -46,7 +49,7 @@ class Matrix {
                     for (size_t x = 0; y < columns; x++) {
                         value += data[y][x] * m.data[x][i];
                     }
-                    result[y][i] = value;
+                    result.data[y][i] = value;
                 }
             }
 
@@ -74,48 +77,16 @@ class Matrix {
         }
 };
 
-template<class T>
-std::vector<T> substract (const std::vector<T> v0, const std::vector<T> v1)
-{
-    std::vector<T> result {};
-    for (int i = 0; i < v0.size(); i++) {
-        result.push_back(v0.at(i) - v1.at(i));
-    }
-    return result;
-}
+std::vector<float> substract (const std::vector<float> v0, const std::vector<float> v1);
 
-template<class T>
-std::vector<T> divide (const std::vector<T> v0, const std::vector<T> v1)
-{
-    std::vector<T> result {};
-    for (int i = 0; i < v0.size(); i++) {
-        result.push_back(v0.at(i) / v1.at(i));
-    }
-    return result;
-}
+std::vector<float> divide (const std::vector<float> v0, const std::vector<float> v1);
 
-template<class T>
-std::vector<T> cross (const std::vector<T> v0, const std::vector<T> v1)
-{
-    T x = (v0.at(1) * v1.at(2)) - (v0.at(2) * v1.at(1));
-    T y = (v0.at(0) * v1.at(2)) - (v0.at(2) * v1.at(0));
-    T z = (v0.at(0) * v1.at(1)) - (v0.at(1) * v1.at(0));
+std::vector<float> cross (const std::vector<float> v0, const std::vector<float> v1);
 
-    return {x, y, z};
-}
+std::vector<float> normalize (const std::vector<float> v);
 
-std::vector<float> normalize (const std::vector<float> v)
-{
-    float magnitude {};
-    for (auto &i: v)
-    {
-        magnitude += std::pow(i, 2);
-    }
-    
-    std::vector<float> result {};
-    for (auto &i : v) {
-        result.push_back(i / magnitude);
-    }
+float dot (const std::vector<float> v0, const std::vector<float> v1);
 
-    return result;
-}
+std::vector<float> negateV (const std::vector<float> v);
+
+#endif

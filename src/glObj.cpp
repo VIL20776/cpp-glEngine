@@ -1,26 +1,7 @@
-#include <cmath>
-#include <cstddef>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <queue>
-#include <array>
-#include <math.h>
-
-using namespace std;
-
-class Obj {
-    using fvector2 = vector<vector<float>>;
-    using ivector3 = vector<vector<vector<int>>>;
-
-    private:
-    fvector2 vertexes;
-    fvector2 textureCoords;
-    fvector2 normals;
-    ivector3 faces;
+#include "../include/glObj.hpp"
 
     //Functions
-    queue<string> splitLine(string s, string delimiter) {
+    queue<string> Obj::splitLine(string s, string delimiter) {
         size_t pos = 0;
         queue<string> tokens;
         while ((pos = s.find(delimiter)) != std::string::npos) {
@@ -30,8 +11,7 @@ class Obj {
         return tokens;
     }
 
-    public:
-    Obj(string filename) {
+    Obj::Obj(string filename) {
         //reader
         string line;
         ifstream inf(filename);
@@ -89,11 +69,10 @@ class Obj {
         }
     }
 
-    fvector2 getVertexes () { return vertexes; }
+    Obj::fvector2 Obj::getVertexes () { return vertexes; }
 
-    fvector2 getTextCoords () { return textureCoords; }
+    Obj::fvector2 Obj::getTextCoords () { return textureCoords; }
 
-    fvector2 getNormals () { return normals; }
+    Obj::fvector2 Obj::getNormals () { return normals; }
 
-    ivector3 getFaces () { return faces; }
-};
+    Obj::ivector3 Obj::getFaces () { return faces; }

@@ -1,25 +1,7 @@
-#include <array>
-#include <cmath>
-#include <cstddef>
-#include <algorithm>
-#include <cstdint>
-#include <vector>
-#include <unordered_map>
-
-#include "liblinalg.cpp"
-#include "glObj.cpp"
-#include "glBmp.cpp"
-
-class GlRender3D: public GlBmp
-{
-    private:
-    // 3D rendering components
-    vector<float> zbuffer;
-    Texture texture;
-    DirLight dirLight;
+#include "../include/glRender3D.hpp"
 
     // Functions
-    array<float, 3> baryCoords (array<float, 3> A, array<float, 3> B, array<float, 3> C, array<float, 2> P)
+    array<float, 3> GlRender3D::baryCoords (vector<float> A, vector<float> B, vector<float> C, array<float, 2> P)
     {
         float areaPBC = (B.at(1) - C.at(1)) * (P.at(0) - C.at(0)) + (C.at(0) - B.at(0)) * (P.at(1) - C.at(1));
         float areaPAC = (C.at(1) - A.at(1)) * (P.at(0) - C.at(0)) + (A.at(0) - C.at(0)) * (P.at(1) - C.at(1));
@@ -36,7 +18,7 @@ class GlRender3D: public GlBmp
         return {u, v, w};
     }
 
-    Matrix<float, 4, 4> glCreateRotationMatrix (float pitch = 0, float yaw = 0, float roll = 0)
+    Matrix<float, 4, 4> GlRender3D::glCreateRotationMatrix (float pitch = 0, float yaw = 0, float roll = 0)
     {
         pitch *= M_PI / 180;
         yaw *= M_PI / 180;
@@ -66,7 +48,7 @@ class GlRender3D: public GlBmp
         return pitchMat * yawMat * rollMat;
     }
 
-    Matrix<float, 4, 4> glCreateObjectMatrix (array<float, 3> translate = {0, 0, 0}, array<float, 3> rotate = {0, 0, 0}, array<float, 3> scale = {0, 0, 0})
+    Matrix<float, 4, 4> GlRender3D::glCreateObjectMatrix (array<float, 3> translate = {0, 0, 0}, array<float, 3> rotate = {0, 0, 0}, array<float, 3> scale = {0, 0, 0})
     {
         Matrix<float, 4, 4> translation (
         {{
@@ -90,16 +72,16 @@ class GlRender3D: public GlBmp
         return translation * rotation * scalation;
     }
 
-    array<float, 3> glTransform (const vector<float> vertex, Matrix<float, 4, 4> matrix)
+    vector<float> GlRender3D::glTransform (const vector<float> vertex, Matrix<float, 4, 4> matrix)
     {
         array<float, 4> v = {{vertex[0], vertex[1], vertex[2], 1}};
         array<float, 4> vt = matrix * v;
-        array<float, 3> vf = {{vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]}};
+        vector<float> vf = {{vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]}};
 
         return vf;
     }
 
-    void glTriangle_bc (array<float, 3> A, array<float, 3> B, array<float, 3> C, 
+    void GlRender3D::glTriangle_bc (vector<float> A, vector<float> B, vector<float> C, 
         ObjFaceVec verts, ObjFaceVec texCoords, ObjFaceVec normals )
         {
             array<float, 3> Xvals = {A.at(0), B.at(0), C.at(0)};
@@ -139,9 +121,9 @@ class GlRender3D: public GlBmp
 
                         float z = A.at(2) * bCoords.at(0) + B.at(2) * bCoords.at(1) + C.at(2) * bCoords.at(2);
 
-                        if (x <= info.width && y <= info.height) {
-                            if (z < zbuffer[y * info.width + x] && abs(z) < 1) {
-                                zbuffer[y * info.width + x] = z;
+                        if (x <= width && y <= height) {
+                            if (z < zbuffer[y * width + x] && abs(z) < 1) {
+                                zbuffer[y * width + x] = z;
 
                                 std::unordered_map<string, float> shader_args {};
                                 std::unordered_map<string, vector<float>> shader_vec_args {};
@@ -166,6 +148,11 @@ class GlRender3D: public GlBmp
                                 shader_vec_args["tangent"] = tangent;
                                 shader_vec_args["bitangent"] = bitangent;
                                 //shader
+                                std::array<float, 3> newColor = shader(shader_args, shader_vec_args, dirLight, &texture);
+                                glPointColor(newColor.at(0), newColor.at(1), newColor.at(2));
+                                glWPoint(x, y);
+                            } else {
+                                glWPoint(x, y);
                             }
                         }
                     }
@@ -173,20 +160,39 @@ class GlRender3D: public GlBmp
             }
         }
 
-    public:
+    void GlRender3D::glShader (std::array<float, 3> (*shader) (
+        std::unordered_map<std::string, float>,
+        std::unordered_map<string, std::vector<float>>,
+        vector<float>,
+        BmpFile *)
+    )
+    {
+        this->shader = shader;
+    }
 
-    void glClear ()
+    void GlRender3D::glTexture (BmpFile texture)
+    {
+        this->texture = texture;
+    }
+
+    void GlRender3D::glCreateWindow(uint32_t width, uint32_t height) {
+        this->width = width;
+        this->height = height;
+        pixels.resize(width * height);
+    }
+
+    void GlRender3D::glClear ()
     {
         pixels.clear();
         zbuffer.clear();
 
-        size_t gridSize = info.width * info.height;
+        size_t gridSize = width * height;
         pixels.assign(gridSize, clear);
         zbuffer.assign(gridSize, INFINITY);
     }
 
-    void glLoadModel(string filename,
-        array<float, 3> translate = {0, 0, 0}, array<float, 3> rotate = {0, 0, 0}, array<float, 3> scale = {0, 0, 0})
+    void GlRender3D::glLoadModel(string filename,
+        array<float, 3> translate, array<float, 3> rotate, array<float, 3> scale)
     {
         Obj model = Obj(filename);
         const Matrix<float, 4, 4> modelMatrix = glCreateObjectMatrix(translate, rotate, scale);
@@ -198,9 +204,9 @@ class GlRender3D: public GlBmp
             vector<float> t_v1 = model.getVertexes()[ face[1][0] - 1];
             vector<float> t_v2 = model.getVertexes()[ face[2][0] - 1];
 
-            array<float, 3> v0 = glTransform(t_v0, modelMatrix);
-            array<float, 3> v1 = glTransform(t_v1, modelMatrix);
-            array<float, 3> v2 = glTransform(t_v2, modelMatrix);
+            vector<float> v0 = glTransform(t_v0, modelMatrix);
+            vector<float> v1 = glTransform(t_v1, modelMatrix);
+            vector<float> v2 = glTransform(t_v2, modelMatrix);
 
             vector<float> vt0 = model.getTextCoords()[ face[0][1] - 1];
             vector<float> vt1 = model.getTextCoords()[ face[1][1] - 1];
@@ -210,19 +216,23 @@ class GlRender3D: public GlBmp
             vector<float> vn1 = model.getNormals()[ face[1][2] - 1];
             vector<float> vn2 = model.getNormals()[ face[2][2] - 1];
 
-            // triangle_bc
+            glTriangle_bc(v0, v1, v2, 
+            {v0, v1, v2}, 
+            {vt0, vt1, vt2},
+            {vn0, vn1, vn2});
 
             if (vertCount == 4) {
                 vector<float> t_v3 = model.getVertexes()[ face[3][0] - 1];
-                array<float, 3> v3 = glTransform(t_v3, modelMatrix);
+                vector<float> v3 = glTransform(t_v3, modelMatrix);
                 vector<float> vt3 = model.getTextCoords()[ face[3][1] - 1];
                 vector<float> vn3 = model.getNormals()[ face[3][2] - 1];
 
-                // triangle_bc
+                glTriangle_bc(v0, v1, v2, 
+                {v0, v1, v2}, 
+                {vt0, vt1, vt2},
+                {vn0, vn1, vn2});
             }
 
         }
     }
-
-
-};
+    

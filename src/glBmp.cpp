@@ -1,0 +1,98 @@
+#include "../include/glBmp.hpp"
+
+// Create base file
+BmpFile::BmpFile () {
+    // Header
+    header.signature[0] = 'B';
+    header.signature[1] = 'M';
+    header.fileSize = 0;
+    header.reserved = 0;
+    header.dataOffset = 54;
+
+    // Info header
+    info.size = 40;
+    info.width = 0;
+    info.height = 0;
+    info.planes = 1;
+    info.bitsPerPixel = 24;
+    info.compression = 0;
+    info.imageSize = 0;
+    info.xPixelsPerM = 0;
+    info.yPixelsPerM = 0;
+    info.colorsUsed = 0;
+    info.importantColors = 0;
+}
+
+// Load existing file
+BmpFile::BmpFile (const char *fname) {
+    std::ifstream inp{ fname, std::ios_base::binary };
+    if (inp) {
+        inp.read((char*)&header, sizeof(header));
+            if(header.signature[0] != 'B' || header.signature[1] != 'M') {
+                throw std::runtime_error("Error! Unrecognized file format.");
+        }
+        inp.read((char*)&info, sizeof(info));
+
+        // Jump to the pixel data location
+        inp.seekg(header.dataOffset, inp.beg);
+
+        // Adjust the header fields for output.
+        // Some editors will put extra info in the image file, we only save the headers and the data.
+        info.size = sizeof(BMPInfoHeader);
+        header.dataOffset = sizeof(BMPHeader) + sizeof(BMPInfoHeader);
+        
+        header.fileSize = header.dataOffset;
+
+        if (info.height < 0) {
+            throw std::runtime_error("The program can treat only BMP images with the origin in the bottom left corner!");
+        }
+
+        data.resize(info.width * info.height);
+
+        // Here we check if we need to take into account row padding
+        const int padding = ((4 - (info.width * 3) % 4) % 4);
+
+        for (int i = 0; i < (info.width * info.height); i++) {
+            std::array<unsigned char, 3> color;
+            inp.read((char*) color.data(), 3);
+
+            data[i] = {color[2], color[1], color[0]};
+        }
+        inp.ignore(padding);
+    }
+    else {
+        throw std::runtime_error("Unable to open the input image file.");
+    }
+}
+
+void BmpFile::setSize (uint32_t width, uint32_t height)
+{
+    info.width = width;
+    info.height = height;
+    info.imageSize = (width * height * 3);
+    header.fileSize = 54 + info.imageSize;
+}
+
+void BmpFile::setData (std::vector<Color> data)
+{
+    this->data = data;
+}
+
+Color BmpFile::getColor (size_t u, size_t v)
+{
+    return data.at((v * info.height) * info.width + (u * info.width));
+}
+
+bool BmpFile::empty ()
+{
+    return data.empty();
+}
+
+void BmpFile::save ()
+{
+    std::ofstream of("output.bmp", std::ios_base::binary);
+    of.write((const char*) &header, sizeof(header));
+    of.write((const char*) &info, sizeof(info));
+    of.write((const char*) data.data(), info.imageSize);
+    of.close();
+}

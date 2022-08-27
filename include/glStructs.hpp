@@ -1,3 +1,5 @@
+#ifndef GLSTRUCTS_H
+#define GLSTRUCTS_H
 /*
     Structures used by glRender2D and glRender3D
 */
@@ -37,12 +39,6 @@ struct Color {
     u_char B;
 };
 
-struct DirLight {
-    float x;
-    float y;
-    float z;
-};
-
 struct ViewPort {
     uint32_t x;
     uint32_t y;
@@ -55,3 +51,5 @@ struct ObjFaceVec{
     std::vector<float> v1;
     std::vector<float> v2;
 };
+
+#endif

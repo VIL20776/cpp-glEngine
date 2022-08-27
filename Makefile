@@ -1,0 +1,2 @@
+debug: main.cpp  src/glBmp.cpp src/glBmpRender.cpp src/glObj.cpp src/glRender3D src/glShaders.cpp src/liblinalg.cpp
+	g++ -g main.cpp  src/glBmp.cpp src/glBmpRender.cpp src/glObj.cpp src/glRender3D src/glShaders.cpp src/liblinalg.cpp

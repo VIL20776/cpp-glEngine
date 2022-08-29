@@ -4,7 +4,7 @@ std::array<float, 3> flat (
     const std::unordered_map<std::string, float> shader_args,
     const std::unordered_map<std::string, std::vector<float>> shader_vec_args,
     const std::vector<float> dirLight,
-    BmpFile *texture = nullptr)
+    BmpFile *texture )
 {
     const float u = shader_args.at("bCoord_u");
     const float v = shader_args.at("bCoord_v");   
@@ -18,20 +18,22 @@ std::array<float, 3> flat (
     const std::vector<float> tB = shader_vec_args.at("texCoords_v1");
     const std::vector<float> tC = shader_vec_args.at("texCoords_v2");
 
-    const std::vector<float> triangleNormal = shader_vec_args.at("trinagleNormal");
+    const std::vector<float> triangleNormal = shader_vec_args.at("triangleNormal");
 
     if (texture != nullptr) {
-        int tU = tA[0] * u + tB[0] * v + tC[0] * w;
-        int tV = tA[1] * u + tB[1] * v + tC[1] * w;
+        float tU = tA[0] * u + tB[0] * v + tC[0] * w;
+        float tV = tA[1] * u + tB[1] * v + tC[1] * w;
 
-        Color texColor = texture->getColor(tU, tV);
+        if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
+            Color texColor = texture->getColor(tU, tV);
 
-        b *= texColor.B;
-        g *= texColor.G;
-        r *= texColor.R;
+            b *= texColor.B;
+            g *= texColor.G;
+            r *= texColor.R;
+        }
     }
-
-    float intensity = dot(triangleNormal, negateV(dirLight));
+    std::vector<float> newdirLight = negateV(dirLight);
+    float intensity = dot(triangleNormal, newdirLight);
 
     if (intensity <= 0) {
         return {0, 0, 0};

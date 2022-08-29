@@ -26,7 +26,7 @@ class BmpFile {
 
     void setData (std::vector<Color> data);
 
-    Color getColor (size_t u, size_t v);
+    Color getColor (float u, float v);
 
     bool empty ();
 

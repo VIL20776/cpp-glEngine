@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "glBmp.hpp"
+#include "glStructs.hpp"
 
 using namespace std;
 
@@ -42,7 +43,7 @@ class GlBmpRender {
 
         void glClearColor(float r, float g, float b);
 
-        void glWPoint(uint32_t x, uint32_t y);
+        void glWPoint(uint32_t x, uint32_t y, Color *color = nullptr);
 
         void glVPoint(float x, float y);
 

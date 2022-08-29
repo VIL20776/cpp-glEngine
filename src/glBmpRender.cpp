@@ -1,4 +1,5 @@
 #include "../include/glBmpRender.hpp"
+#include <type_traits>
 
 // Aux Functions
 bool GlBmpRender::evenOdd(uint32_t x, uint32_t y, float poly [][2], size_t num) {
@@ -58,9 +59,9 @@ void GlBmpRender::glClearColor(float r, float g, float b) {
     };
 }
 
-void GlBmpRender::glWPoint(uint32_t x, uint32_t y) {
+void GlBmpRender::glWPoint(uint32_t x, uint32_t y, Color *color) {
     if (x < width && y < height) {
-        pixels[y * width + x] = point;
+        pixels[y * width + x] = (color != nullptr) ? *color: point;
     }
 }
 

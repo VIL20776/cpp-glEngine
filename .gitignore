@@ -1,3 +1,4 @@
+build/
 *.bmp
 *.obj
-test
+a.out

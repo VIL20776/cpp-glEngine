@@ -45,8 +45,8 @@ class Matrix {
             
             for (size_t i = 0; i < m_columns; i++) {
                 for (size_t y = 0; y < rows; y++) {
-                    T value;
-                    for (size_t x = 0; y < columns; x++) {
+                    T value = 0;
+                    for (size_t x = 0; x < columns; x++) {
                         value += data[y][x] * m.data[x][i];
                     }
                     result.data[y][i] = value;
@@ -66,7 +66,7 @@ class Matrix {
             std::array<T, size> result {};
             
             for (size_t y = 0; y < rows; y++) {
-                T value;
+                T value = 0;
                 for (size_t x = 0; x < columns; x++) {
                     value += data[y][x] * v.at(x);
                 }
@@ -74,6 +74,57 @@ class Matrix {
             }
 
             return result;
+        }
+
+        // https://www.codesansar.com/numerical-methods/matrix-inverse-using-gauss-jordan-cpp-output.htm
+        Matrix inverse ()
+        {
+            matrix a {data};
+            int i, j, k, ratio, n = rows;
+            /* Augmenting Identity Matrix of Order n */
+            for(i=1;i<=n;i++)
+            {
+                for(j=1;j<=n;j++)
+                {
+                    if(i==j)
+                    {
+                        a[i][j+n] = 1;
+                    }
+                    else
+                    {
+                        a[i][j+n] = 0;
+                    }
+                }
+            }
+
+            /* Applying Gauss Jordan Elimination */
+            for(i=1;i<=n;i++)
+            {
+                if(a[i][i] == 0.0)
+                {
+                    exit(0);
+                }
+                for(j=1;j<=n;j++)
+                {
+                    if(i!=j)
+                    {
+                        ratio = a[j][i]/a[i][i];
+                        for(k=1;k<=2*n;k++)
+                        {
+                            a[j][k] = a[j][k] - ratio*a[i][k];
+                        }
+                    }
+                }
+            }
+            /* Row Operation to Make Principal Diagonal to 1 */
+            for(i=1;i<=n;i++)
+            {
+                for(j=n+1;j<=2*n;j++)
+                {
+                    a[i][j] = a[i][j]/a[i][i];
+                }
+            }
+            return Matrix {data};
         }
 };
 

@@ -30,7 +30,7 @@ std::vector<float> cross (const std::vector<float> v0, const std::vector<float> 
 
 std::vector<float> normalize (const std::vector<float> v)
 {
-    float magnitude {};
+    float magnitude = 0;
     for (auto &i: v)
     {
         magnitude += std::pow(i, 2);
@@ -38,7 +38,7 @@ std::vector<float> normalize (const std::vector<float> v)
     
     std::vector<float> result {};
     for (auto &i : v) {
-        result.push_back(i / magnitude);
+        result.push_back(i / sqrt(magnitude));
     }
 
     return result;
@@ -46,7 +46,7 @@ std::vector<float> normalize (const std::vector<float> v)
 
 float dot (const std::vector<float> v0, const std::vector<float> v1)
 {
-    float result;
+    float result = 0;
     for (size_t i = 0; i < v0.size(); i++) {
         result += v0.at(i) * v1.at(i);
     }
@@ -57,8 +57,13 @@ std::vector<float> negateV (const std::vector<float> v)
 {
     std::vector<float> result {};
     for (auto &i : v) {
-        result.push_back(i);
+        if (i != 0) {
+            result.push_back(-i);
+        } else{
+            result.push_back(i);
+        }
     }
 
     return result;
 }
+

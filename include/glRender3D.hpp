@@ -10,6 +10,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "glBmp.hpp"
 #include "liblinalg.hpp"
 #include "glObj.hpp"
 #include "glBmpRender.hpp"
@@ -20,13 +21,13 @@ class GlRender3D: public GlBmpRender
     // 3D rendering components
 
     vector<float> zbuffer {};
-    BmpFile texture {};
+    BmpFile texture = {};
     std::array<float, 3> (*shader) (
         std::unordered_map<std::string, float>,
         std::unordered_map<string, std::vector<float>>,
         vector<float>,
         BmpFile *);
-    vector<float> dirLight {0, 0, 1};
+    vector<float> dirLight {0, 0, -1};
 
     // Functions
 

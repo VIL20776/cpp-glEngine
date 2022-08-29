@@ -4,10 +4,12 @@
     queue<string> Obj::splitLine(string s, string delimiter) {
         size_t pos = 0;
         queue<string> tokens;
-        while ((pos = s.find(delimiter)) != std::string::npos) {
+        do {
+            pos = s.find(delimiter);
             tokens.push(s.substr(0, pos));
             s.erase(0, pos + delimiter.length());
-        }
+        } while (pos != std::string::npos);
+
         return tokens;
     }
 
@@ -20,13 +22,13 @@
         
             queue<string> qLine = splitLine(line, " ");
 
-            string prefix = qLine.back();
+            string prefix = qLine.front();
             qLine.pop();
 
             if (prefix == "v") {
                 vector<float> vertex = {};
-                while (qLine.empty()) {
-                    vertex.push_back(stof(qLine.back()));
+                while (!qLine.empty()) {
+                    vertex.push_back(stof(qLine.front()));
                     qLine.pop();
                 }
                 vertexes.push_back(vertex);
@@ -34,8 +36,8 @@
             }
             if (prefix == "vt") {
                 vector<float> textureCoord = {};
-                while (qLine.empty()) {
-                    textureCoord.push_back(stof(qLine.back()));
+                while (!qLine.empty()) {
+                    textureCoord.push_back(stof(qLine.front()));
                     qLine.pop();
                 }
                 textureCoords.push_back(textureCoord);
@@ -43,8 +45,8 @@
             }
             if (prefix == "vn") {
                 vector<float> normal = {};
-                while (qLine.empty()) {
-                    normal.push_back(stof(qLine.back()));
+                while (!qLine.empty()) {
+                    normal.push_back(stof(qLine.front()));
                     qLine.pop();
                 }
                 normals.push_back(normal);
@@ -52,11 +54,11 @@
             }
             if (prefix == "f") {
                 vector<vector<int>> faces;
-                while (qLine.empty()) {
-                    queue<string> qface = splitLine(qLine.back(), "/");
+                while (!qLine.empty()) {
+                    queue<string> qface = splitLine(qLine.front(), "/");
                     vector<int> face = {};
                     while (qface.size()) {
-                        face.push_back(stoi(qface.back()));
+                        face.push_back(stoi(qface.front()));
                         qface.pop();
                     }
                     faces.push_back(face);

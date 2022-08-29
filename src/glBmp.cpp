@@ -56,7 +56,7 @@ BmpFile::BmpFile (const char *fname) {
             std::array<unsigned char, 3> color;
             inp.read((char*) color.data(), 3);
 
-            data[i] = {color[2], color[1], color[0]};
+            data[i] = {color[0], color[1], color[2]};
         }
         inp.ignore(padding);
     }
@@ -78,9 +78,9 @@ void BmpFile::setData (std::vector<Color> data)
     this->data = data;
 }
 
-Color BmpFile::getColor (size_t u, size_t v)
+Color BmpFile::getColor (float u, float v)
 {
-    return data.at((v * info.height) * info.width + (u * info.width));
+    return data.at((unsigned int) ((v * info.height) * info.width + (u * info.width)));
 }
 
 bool BmpFile::empty ()

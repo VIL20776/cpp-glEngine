@@ -1,4 +1,5 @@
 #include "../include/glRender3D.hpp"
+#include <cstddef>
 
     // Functions
     array<float, 3> GlRender3D::baryCoords (vector<float> A, vector<float> B, vector<float> C, array<float, 2> P)
@@ -45,7 +46,7 @@
             {0, 0, 0, 1}
         }});
 
-        return pitchMat * yawMat * rollMat;
+        return pitchMat * (yawMat * rollMat);
     }
 
     Matrix<float, 4, 4> GlRender3D::glCreateObjectMatrix (array<float, 3> translate = {0, 0, 0}, array<float, 3> rotate = {0, 0, 0}, array<float, 3> scale = {0, 0, 0})
@@ -69,7 +70,7 @@
             }}
         );
 
-        return translation * rotation * scalation;
+        return translation * (rotation * scalation);
     }
 
     vector<float> GlRender3D::glTransform (const vector<float> vertex, Matrix<float, 4, 4> matrix)
@@ -103,62 +104,68 @@
             float f =   1 / (deltaUV1.at(0) * deltaUV2.at(1) - deltaUV2.at(0) * deltaUV1.at(1));
 
             vector<float> tangent = {
-                f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]),
-                f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]),
-                f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2])};
+                f * (deltaUV2.at(1) * edge1.at(0) - deltaUV1.at(1) * edge2.at(0)),
+                f * (deltaUV2.at(1) * edge1.at(1) - deltaUV1.at(1) * edge2.at(1)),
+                f * (deltaUV2.at(1) * edge1.at(2) - deltaUV1.at(1) * edge2.at(2))};
 
             tangent = divide(tangent, normalize(tangent));
 
             vector<float> bitangent = cross(triangleNormal, tangent);
             bitangent = divide(bitangent, normalize(bitangent));
 
-            for (uint32_t x = minX; x == maxX; x++) {
-                for (uint32_t y = minY; y == maxY; y++) {
+            for (uint32_t x = minX; x < maxX; x++) {
+                for (uint32_t y = minY; y < maxY; y++) {
                     
                     array<float, 3> bCoords = baryCoords(A, B, C, {(float) x, (float) y});
 
-                    if (bCoords.at(0) <= 0 && bCoords.at(1) <= 0 && bCoords.at(2) <= 0) {
+                    if (bCoords.at(0) >= 0 && bCoords.at(1) >= 0 && bCoords.at(2) >= 0) {
 
                         float z = A.at(2) * bCoords.at(0) + B.at(2) * bCoords.at(1) + C.at(2) * bCoords.at(2);
 
-                        if (x <= width && y <= height) {
-                            if (z < zbuffer[y * width + x] && abs(z) < 1) {
-                                zbuffer[y * width + x] = z;
+                        if (x < width && y < height) {
+                            if (z < zbuffer.at(y * width + x)) {
+                                zbuffer.at(y * width + x) = z;
 
-                                std::unordered_map<string, float> shader_args {};
-                                std::unordered_map<string, vector<float>> shader_vec_args {};
+                                if (!texture.empty()){
+                                    std::unordered_map<string, float> shader_args {};
+                                    std::unordered_map<string, vector<float>> shader_vec_args {};
 
-                                shader_args["bCoord_u"] = bCoords.at(0);
-                                shader_args["bCoord_v"] = bCoords.at(1);
-                                shader_args["bCoord_w"] = bCoords.at(2);
+                                    shader_args["bCoord_u"] = bCoords.at(0);
+                                    shader_args["bCoord_v"] = bCoords.at(1);
+                                    shader_args["bCoord_w"] = bCoords.at(2);
 
-                                shader_args["vColor_r"] = point.R;
-                                shader_args["vColor_g"] = point.G;
-                                shader_args["vColor_b"] = point.B;
+                                    shader_args["vColor_r"] = (float) point.R;
+                                    shader_args["vColor_g"] = (float) point.G;
+                                    shader_args["vColor_b"] = (float) point.B;
 
-                                shader_vec_args["texCoords_v0"] = texCoords.v0;
-                                shader_vec_args["texCoords_v1"] = texCoords.v1;
-                                shader_vec_args["texCoords_v2"] = texCoords.v2;
+                                    shader_vec_args["texCoords_v0"] = texCoords.v0;
+                                    shader_vec_args["texCoords_v1"] = texCoords.v1;
+                                    shader_vec_args["texCoords_v2"] = texCoords.v2;
 
-                                shader_vec_args["normals_v0"] = normals.v0;
-                                shader_vec_args["normals_v1"] = normals.v1;
-                                shader_vec_args["normals_v2"] = normals.v2;
+                                    shader_vec_args["normals_v0"] = normals.v0;
+                                    shader_vec_args["normals_v1"] = normals.v1;
+                                    shader_vec_args["normals_v2"] = normals.v2;
 
-                                shader_vec_args["triangleNormal"] = triangleNormal;
-                                shader_vec_args["tangent"] = tangent;
-                                shader_vec_args["bitangent"] = bitangent;
-                                //shader
-                                std::array<float, 3> newColor = shader(shader_args, shader_vec_args, dirLight, &texture);
-                                glPointColor(newColor.at(0), newColor.at(1), newColor.at(2));
-                                glWPoint(x, y);
-                            } else {
-                                glWPoint(x, y);
+                                    shader_vec_args["triangleNormal"] = triangleNormal;
+                                    shader_vec_args["tangent"] = tangent;
+                                    shader_vec_args["bitangent"] = bitangent;
+                                    //shader
+                                    std::array<float, 3> newColor = shader(shader_args, shader_vec_args, dirLight, &texture);
+                                    Color nColor = {
+                                        (u_char) (newColor.at(2) * 255),
+                                        (u_char) (newColor.at(1) * 255),
+                                        (u_char) (newColor.at(0) * 255)
+                                        };
+                                    glWPoint(x, y, &nColor);
+                                } else {
+                                    glWPoint(x, y);
                             }
                         }
                     }
                 }
             }
         }
+    }
 
     void GlRender3D::glShader (std::array<float, 3> (*shader) (
         std::unordered_map<std::string, float>,
@@ -179,6 +186,7 @@
         this->width = width;
         this->height = height;
         pixels.resize(width * height);
+        zbuffer.resize(width * height);
     }
 
     void GlRender3D::glClear ()
@@ -200,21 +208,21 @@
         for (auto &face: model.getFaces()) {
             int vertCount = face.size();
             
-            vector<float> t_v0 = model.getVertexes()[ face[0][0] - 1];
-            vector<float> t_v1 = model.getVertexes()[ face[1][0] - 1];
-            vector<float> t_v2 = model.getVertexes()[ face[2][0] - 1];
+            vector<float> t_v0 = model.getVertexes().at( face[0][0] - 1);
+            vector<float> t_v1 = model.getVertexes().at( face[1][0] - 1);
+            vector<float> t_v2 = model.getVertexes().at( face[2][0] - 1);
 
             vector<float> v0 = glTransform(t_v0, modelMatrix);
             vector<float> v1 = glTransform(t_v1, modelMatrix);
             vector<float> v2 = glTransform(t_v2, modelMatrix);
 
-            vector<float> vt0 = model.getTextCoords()[ face[0][1] - 1];
-            vector<float> vt1 = model.getTextCoords()[ face[1][1] - 1];
-            vector<float> vt2 = model.getTextCoords()[ face[2][1] - 1];
+            vector<float> vt0 = model.getTextCoords().at( face[0][1] - 1);
+            vector<float> vt1 = model.getTextCoords().at( face[1][1] - 1);
+            vector<float> vt2 = model.getTextCoords().at( face[2][1] - 1);
 
-            vector<float> vn0 = model.getNormals()[ face[0][2] - 1];
-            vector<float> vn1 = model.getNormals()[ face[1][2] - 1];
-            vector<float> vn2 = model.getNormals()[ face[2][2] - 1];
+            vector<float> vn0 = model.getNormals().at( face[0][2] - 1);
+            vector<float> vn1 = model.getNormals().at( face[1][2] - 1);
+            vector<float> vn2 = model.getNormals().at( face[2][2] - 1);
 
             glTriangle_bc(v0, v1, v2, 
             {v0, v1, v2}, 
@@ -222,10 +230,10 @@
             {vn0, vn1, vn2});
 
             if (vertCount == 4) {
-                vector<float> t_v3 = model.getVertexes()[ face[3][0] - 1];
+                vector<float> t_v3 = model.getVertexes().at( face[3][0] - 1);
                 vector<float> v3 = glTransform(t_v3, modelMatrix);
-                vector<float> vt3 = model.getTextCoords()[ face[3][1] - 1];
-                vector<float> vn3 = model.getNormals()[ face[3][2] - 1];
+                vector<float> vt3 = model.getTextCoords().at( face[3][1] - 1);
+                vector<float> vn3 = model.getNormals().at( face[3][2] - 1);
 
                 glTriangle_bc(v0, v1, v2, 
                 {v0, v1, v2}, 

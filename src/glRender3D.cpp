@@ -231,7 +231,6 @@
         fill = {255, 255, 0};
 
         glViewMatrix();
-        glViewPort(0, 0, width, height);
     }
 
     void GlRender3D::glShader (std::array<float, 3> (*shader) (
@@ -275,6 +274,7 @@
         this->height = height;
         pixels.resize(width * height);
         zbuffer.resize(width * height);
+        glViewPort(0, 0, width, height);
     }
 
     void GlRender3D::glClear ()

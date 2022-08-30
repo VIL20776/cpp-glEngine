@@ -8,8 +8,8 @@
 int main() {
     GlRender3D render;
 
-    const float width = 960;
-    const float height = 540;
+    const float width = 480;
+    const float height = 270;
 
     render.glInit();
     render.glCreateWindow(width, height);
@@ -26,4 +26,6 @@ int main() {
         {2, 2, 2});
 
     render.glFinish();
+
+    return 0;
 }

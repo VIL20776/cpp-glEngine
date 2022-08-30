@@ -1,8 +1,4 @@
 #include "../include/glRender3D.hpp"
-#include <cmath>
-#include <cstddef>
-#include <ios>
-#include <vector>
 
     // Functions
     array<float, 3> GlRender3D::baryCoords (vector<float> A, vector<float> B, vector<float> C, array<float, 2> P)
@@ -130,7 +126,7 @@
     vector<float> GlRender3D::glCamTransform (const vector<float> vertex)
     {
         array<float, 4> v = {{vertex[0], vertex[1], vertex[2], 1}};
-        array<float, 4> vt = viewportMatrix * projectionMatrix * viewMatrix * v;
+        array<float, 4> vt = (viewportMatrix * (projectionMatrix * (viewMatrix * v)));
         vector<float> vf = {{vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]}};
 
         return vf;
@@ -178,7 +174,7 @@
                         float z = A.at(2) * bCoords.at(0) + B.at(2) * bCoords.at(1) + C.at(2) * bCoords.at(2);
 
                         if (x < width && y < height) {
-                            if (z < zbuffer.at(y * width + x)) {
+                            if (z < zbuffer.at(y * width + x) && abs(z) <= 1) {
                                 zbuffer.at(y * width + x) = z;
 
                                 if (!texture.empty()){
@@ -250,7 +246,7 @@
 
     void GlRender3D::glLookAt(vector<float> eye, vector<float> camPosition)
     {
-        vector<float> forward = substract(eye, camPosition);
+        vector<float> forward = substract(camPosition, eye);
         forward = divide(forward, normalize(forward));
 
         vector<float> right = cross({0, 1, 0}, forward);

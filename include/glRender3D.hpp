@@ -45,7 +45,7 @@ class GlRender3D: public GlBmpRender
 
     Matrix<float, 4, 4> glCreateRotationMatrix (float pitch, float yaw, float roll);
 
-    Matrix<float, 4, 4> glCreateObjectMatrix (array<float, 3> translate = {0, 0, 0}, array<float, 3> rotate = {0, 0, 0}, array<float, 3> scale = {0, 0, 0});
+    Matrix<float, 4, 4> glCreateObjectMatrix (array<float, 3> translate = {0, 0, 0}, array<float, 3> rotate = {0, 0, 0}, array<float, 3> scale = {1, 1, 1});
 
     vector<float> glTransform (const vector<float> vertex, Matrix<float, 4, 4> matrix);
 

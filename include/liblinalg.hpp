@@ -66,65 +66,92 @@ class Matrix {
             std::array<T, size> result {};
             
             for (size_t y = 0; y < rows; y++) {
-                T value = 0;
                 for (size_t x = 0; x < columns; x++) {
-                    value += data[y][x] * v.at(x);
+                    result[y] += data[y][x] * v.at(x);
                 }
-                result[y] = value;
             }
 
             return result;
         }
 
-        // https://www.codesansar.com/numerical-methods/matrix-inverse-using-gauss-jordan-cpp-output.htm
+        // https://www.geeksforgeeks.org/finding-inverse-of-a-matrix-using-gauss-jordan-method/
         Matrix inverse ()
-        {
-            matrix a {data};
-            int i, j, k, ratio, n = rows;
-            /* Augmenting Identity Matrix of Order n */
-            for(i=1;i<=n;i++)
-            {
-                for(j=1;j<=n;j++)
-                {
-                    if(i==j)
-                    {
-                        a[i][j+n] = 1;
-                    }
-                    else
-                    {
-                        a[i][j+n] = 0;
-                    }
+        {    
+            T temp;
+
+            // Create the augmented matrix
+            std::array<std::array<T, 2*columns>, rows> augmented {};
+            for (size_t y = 0; y < rows; y++) {
+                for (size_t x = 0; x < columns; x++) {
+                    augmented[y][x] = data[y][x];
+                }
+            }      
+
+            // Add the identity matrix
+            // of order at the end of original matrix.
+            for (int i = 0; i < rows; i++) {
+        
+                for (int j = 0; j < 2 * rows; j++) {
+        
+                    // Add '1' at the diagonal places of
+                    // the matrix to create a identity matrix
+                    if (j == (i + rows))
+                        augmented[i][j] = 1;
                 }
             }
-
-            /* Applying Gauss Jordan Elimination */
-            for(i=1;i<=n;i++)
-            {
-                if(a[i][i] == 0.0)
-                {
-                    exit(0);
+        
+            // Interchange the row of matrix,
+            // interchanging of row will start from the last row
+            for (int i = rows - 1; i > 0; i--) {
+        
+                // Swapping each and every element of the two rows
+                if (augmented[i - 1][0] < augmented[i][0])
+                for (int j = 0; j < 2 * rows; j++) {
+                
+                       // Swapping of the row, if above
+                       // condition satisfied.
+                temp = augmented[i][j];
+                augmented[i][j] = augmented[i - 1][j];
+                augmented[i - 1][j] = temp;
                 }
-                for(j=1;j<=n;j++)
-                {
-                    if(i!=j)
-                    {
-                        ratio = a[j][i]/a[i][i];
-                        for(k=1;k<=2*n;k++)
-                        {
-                            a[j][k] = a[j][k] - ratio*a[i][k];
+            }
+        
+            // Replace a row by sum of itself and a
+            // constant multiple of another row of the matrix
+            for (int i = 0; i < rows; i++) {
+        
+                for (int j = 0; j < rows; j++) {
+        
+                    if (j != i) {
+        
+                        temp = augmented[j][i] / augmented[i][i];
+                        for (int k = 0; k < 2 * rows; k++) {
+        
+                            augmented[j][k] -= augmented[i][k] * temp;
                         }
                     }
                 }
             }
-            /* Row Operation to Make Principal Diagonal to 1 */
-            for(i=1;i<=n;i++)
-            {
-                for(j=n+1;j<=2*n;j++)
-                {
-                    a[i][j] = a[i][j]/a[i][i];
+        
+            // Multiply each row by a nonzero integer.
+            // Divide row element by the diagonal element
+            for (int i = 0; i < rows; i++) {
+        
+                temp = augmented[i][i];
+                for (int j = 0; j < 2 * rows; j++) {
+        
+                    augmented[i][j] = augmented[i][j] / temp;
                 }
             }
-            return Matrix {a};
+
+            matrix inverse {};
+            for (size_t y = 0; y < rows; y++) {
+                for (size_t x = columns; x < 2 * columns; x++) {
+                    inverse[y][x - columns] = augmented[y][x];
+                }
+            }   
+        
+            return {inverse};
         }
 };
 

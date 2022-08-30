@@ -124,7 +124,7 @@ class Matrix {
                     a[i][j] = a[i][j]/a[i][i];
                 }
             }
-            return Matrix {data};
+            return Matrix {a};
         }
 };
 

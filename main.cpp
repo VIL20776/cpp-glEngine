@@ -22,7 +22,7 @@ int main() {
     render.glLoadModel(
         "fox.obj",
         {width/2, height/2, 0},
-        {0, 0, 0},
+        {0, 135, 0},
         {2, 2, 2});
 
     render.glFinish();

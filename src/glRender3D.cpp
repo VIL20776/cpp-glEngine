@@ -1,5 +1,8 @@
 #include "../include/glRender3D.hpp"
+#include <cmath>
 #include <cstddef>
+#include <ios>
+#include <vector>
 
     // Functions
     array<float, 3> GlRender3D::baryCoords (vector<float> A, vector<float> B, vector<float> C, array<float, 2> P)
@@ -17,6 +20,39 @@
         float w = 1 - u - v;
 
         return {u, v, w};
+    }
+
+    void GlRender3D::glViewPort(float x, float y, float width, float height)
+    {
+        viewport = {(uint32_t) x, (uint32_t) y, (uint32_t) width, (uint32_t) height};
+        viewportMatrix = {{{
+            {width/2, 0, 0, x + (width/2)},
+            {0, height/2, 0, y + (height/2)},
+            {0, 0, 0.5, 0.5},
+            {0, 0, 0, 1}
+        }}};
+
+        glProjectionMatrix();
+    }
+
+    void GlRender3D::glViewMatrix (array<float, 3> translate, array<float, 3> rotate)
+    {
+        camMatrix = glCreateObjectMatrix(translate, rotate);
+        viewMatrix = camMatrix.inverse();
+    }
+
+    void GlRender3D::glProjectionMatrix (float n, float f, float fov)
+    {
+        float aspectRatio = (float) viewport.width / viewport.height;
+        float t = tan((fov * M_PI/180) / 2) * n;
+        float r = t * aspectRatio;
+
+        projectionMatrix = {{{
+            {n/r, 0, 0, 0},
+            {0, n/t, 0, 0},
+            {0, 0, -(f+n)/(f-n), -(2*f*n)/(f-n)},
+            {0, 0, -1, 0}
+        }}};
     }
 
     Matrix<float, 4, 4> GlRender3D::glCreateRotationMatrix (float pitch = 0, float yaw = 0, float roll = 0)
@@ -49,7 +85,7 @@
         return pitchMat * (yawMat * rollMat);
     }
 
-    Matrix<float, 4, 4> GlRender3D::glCreateObjectMatrix (array<float, 3> translate = {0, 0, 0}, array<float, 3> rotate = {0, 0, 0}, array<float, 3> scale = {0, 0, 0})
+    Matrix<float, 4, 4> GlRender3D::glCreateObjectMatrix (array<float, 3> translate, array<float, 3> rotate, array<float, 3> scale)
     {
         Matrix<float, 4, 4> translation (
         {{
@@ -81,6 +117,25 @@
 
         return vf;
     }
+
+    vector<float> GlRender3D::glDirTransform (const vector<float> dirVector, Matrix<float, 4, 4> rotMatrix)
+    {
+        array<float, 4> v = {{dirVector[0], dirVector[1], dirVector[2], 1}};
+        array<float, 4> vt = rotMatrix * v;
+        vector<float> vf = {{vt[0], vt[1], vt[2]}};
+
+        return vf;
+    }
+
+    vector<float> GlRender3D::glCamTransform (const vector<float> vertex)
+    {
+        array<float, 4> v = {{vertex[0], vertex[1], vertex[2], 1}};
+        array<float, 4> vt = viewportMatrix * projectionMatrix * viewMatrix * v;
+        vector<float> vf = {{vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]}};
+
+        return vf;
+    }
+
 
     void GlRender3D::glTriangle_bc (vector<float> A, vector<float> B, vector<float> C, 
         ObjFaceVec verts, ObjFaceVec texCoords, ObjFaceVec normals )
@@ -167,6 +222,18 @@
         }
     }
 
+    /* public implementations */
+
+    void GlRender3D::glInit()
+    {
+        clear = {0, 0, 0};
+        point = {255, 255, 255};
+        fill = {255, 255, 0};
+
+        glViewMatrix();
+        glViewPort(0, 0, width, height);
+    }
+
     void GlRender3D::glShader (std::array<float, 3> (*shader) (
         std::unordered_map<std::string, float>,
         std::unordered_map<string, std::vector<float>>,
@@ -180,6 +247,27 @@
     void GlRender3D::glTexture (BmpFile texture)
     {
         this->texture = texture;
+    }
+
+    void GlRender3D::glLookAt(vector<float> eye, vector<float> camPosition)
+    {
+        vector<float> forward = substract(eye, camPosition);
+        forward = divide(forward, normalize(forward));
+
+        vector<float> right = cross({0, 1, 0}, forward);
+        right = divide(right, normalize(right));
+
+        vector<float> up = cross(forward, right);
+        up = divide(up, normalize(up));
+
+        camMatrix = {{{
+            {right.at(0), up.at(0), forward.at(0), camPosition.at(0)},
+            {right.at(1), up.at(1), forward.at(1), camPosition.at(1)},
+            {right.at(2), up.at(2), forward.at(2), camPosition.at(2)},
+            {0, 0, 0, 1}
+        }}};
+
+        viewMatrix = camMatrix.inverse();
     }
 
     void GlRender3D::glCreateWindow(uint32_t width, uint32_t height) {
@@ -204,6 +292,7 @@
     {
         Obj model = Obj(filename);
         const Matrix<float, 4, 4> modelMatrix = glCreateObjectMatrix(translate, rotate, scale);
+        const Matrix<float, 4, 4> rotationMatrix = glCreateRotationMatrix(rotate.at(0), rotate.at(1), rotate.at(2));
 
         for (auto &face: model.getFaces()) {
             int vertCount = face.size();
@@ -216,6 +305,10 @@
             vector<float> v1 = glTransform(t_v1, modelMatrix);
             vector<float> v2 = glTransform(t_v2, modelMatrix);
 
+            vector<float> A = glCamTransform(v0);
+            vector<float> B = glCamTransform(v1);
+            vector<float> C = glCamTransform(v2);
+            
             vector<float> vt0 = model.getTextCoords().at( face[0][1] - 1);
             vector<float> vt1 = model.getTextCoords().at( face[1][1] - 1);
             vector<float> vt2 = model.getTextCoords().at( face[2][1] - 1);
@@ -223,8 +316,11 @@
             vector<float> vn0 = model.getNormals().at( face[0][2] - 1);
             vector<float> vn1 = model.getNormals().at( face[1][2] - 1);
             vector<float> vn2 = model.getNormals().at( face[2][2] - 1);
+            vn0 = glDirTransform(vn0, rotationMatrix);
+            vn1 = glDirTransform(vn1, rotationMatrix);
+            vn2 = glDirTransform(vn2, rotationMatrix);
 
-            glTriangle_bc(v0, v1, v2, 
+            glTriangle_bc(A, B, C, 
             {v0, v1, v2}, 
             {vt0, vt1, vt2},
             {vn0, vn1, vn2});
@@ -232,13 +328,15 @@
             if (vertCount == 4) {
                 vector<float> t_v3 = model.getVertexes().at( face[3][0] - 1);
                 vector<float> v3 = glTransform(t_v3, modelMatrix);
+                vector<float> D = glCamTransform(v3);
                 vector<float> vt3 = model.getTextCoords().at( face[3][1] - 1);
                 vector<float> vn3 = model.getNormals().at( face[3][2] - 1);
+                vn3 = glDirTransform(vn3, rotationMatrix);
 
-                glTriangle_bc(v0, v1, v2, 
-                {v0, v1, v2}, 
-                {vt0, vt1, vt2},
-                {vn0, vn1, vn2});
+                glTriangle_bc(A, C, D, 
+                {v0, v2, v3}, 
+                {vt0, vt2, vt3},
+                {vn0, vn2, vn3});
             }
 
         }

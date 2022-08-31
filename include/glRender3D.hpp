@@ -22,7 +22,7 @@ class GlRender3D: public GlBmpRender
 
     vector<float> zbuffer {};
     BmpFile texture = {};
-    std::array<float, 3> (*shader) (
+    Color (*shader) (
         std::unordered_map<std::string, float>,
         std::unordered_map<string, std::vector<float>>,
         vector<float>,
@@ -60,7 +60,7 @@ class GlRender3D: public GlBmpRender
 
     void glInit ();
 
-    void glShader (std::array<float, 3> (*shader) (
+    void glShader (Color (*shader) (
         std::unordered_map<std::string, float>,
         std::unordered_map<string, std::vector<float>>,
         vector<float>,
@@ -71,7 +71,7 @@ class GlRender3D: public GlBmpRender
 
     void glLookAt (vector<float> eye, vector<float> camPosition = {0, 0, 0});
 
-    void glCreateWindow(uint32_t width, uint32_t height);
+    void glCreateWindow(float width, float height);
 
     void glClear ();
 

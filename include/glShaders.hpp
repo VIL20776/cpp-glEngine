@@ -11,7 +11,7 @@
 #include "glBmp.hpp"
 #include "liblinalg.hpp"
 
-std::array<float, 3> flat (
+Color flat (
     const std::unordered_map<std::string, float> shader_args,
     const std::unordered_map<std::string, std::vector<float>> shader_vec_args,
     const std::vector<float> dirLight,

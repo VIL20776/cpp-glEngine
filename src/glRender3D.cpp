@@ -91,7 +91,7 @@
             {0, 0, 0, 1}
         }});
 
-        Matrix<float, 4, 4> rotation (glCreateRotationMatrix());
+        Matrix<float, 4, 4> rotation (glCreateRotationMatrix(rotate[0], rotate[1], rotate[2]));
 
         Matrix<float, 4, 4> scalation (
             {{
@@ -116,7 +116,7 @@
 
     vector<float> GlRender3D::glDirTransform (const vector<float> dirVector, Matrix<float, 4, 4> rotMatrix)
     {
-        array<float, 4> v = {{dirVector[0], dirVector[1], dirVector[2], 1}};
+        array<float, 4> v = {{dirVector[0], dirVector[1], dirVector[2], 0}};
         array<float, 4> vt = rotMatrix * v;
         vector<float> vf = {{vt[0], vt[1], vt[2]}};
 
@@ -139,16 +139,16 @@
             array<float, 3> Xvals = {A.at(0), B.at(0), C.at(0)};
             array<float, 3> Yvals = {A.at(1), B.at(1), C.at(1)};
 
-            uint32_t minX = std::round(*std::min_element(Xvals.begin(), Xvals.end()));
-            uint32_t minY = std::round(*std::min_element(Yvals.begin(), Yvals.end()));
-            uint32_t maxX = std::round(*std::max_element(Xvals.begin(), Xvals.end()));
-            uint32_t maxY = std::round(*std::max_element(Yvals.begin(), Yvals.end()));
+            long minX = (long) std::round(*std::min_element(Xvals.begin(), Xvals.end()));
+            long minY = (long) std::round(*std::min_element(Yvals.begin(), Yvals.end()));
+            long maxX = (long) std::round(*std::max_element(Xvals.begin(), Xvals.end()));
+            long maxY = (long) std::round(*std::max_element(Yvals.begin(), Yvals.end()));
 
             vector<float> edge1 = substract(verts.v1, verts.v0);
             vector<float> edge2 = substract(verts.v2, verts.v0);
 
             vector<float> triangleNormal = cross(edge1, edge2);
-            triangleNormal = divide(triangleNormal, normalize(triangleNormal));
+            triangleNormal = normalize(triangleNormal);
 
             vector<float> deltaUV1 = substract(texCoords.v1, texCoords.v0);
             vector<float> deltaUV2 = substract(texCoords.v2, texCoords.v0);
@@ -159,13 +159,13 @@
                 f * (deltaUV2.at(1) * edge1.at(1) - deltaUV1.at(1) * edge2.at(1)),
                 f * (deltaUV2.at(1) * edge1.at(2) - deltaUV1.at(1) * edge2.at(2))};
 
-            tangent = divide(tangent, normalize(tangent));
+            tangent = normalize(tangent);
 
             vector<float> bitangent = cross(triangleNormal, tangent);
-            bitangent = divide(bitangent, normalize(bitangent));
+            bitangent = normalize(bitangent);
 
-            for (uint32_t x = minX; x < maxX; x++) {
-                for (uint32_t y = minY; y < maxY; y++) {
+            for (long x = minX; x < maxX; x++) {
+                for (long y = minY; y < maxY; y++) {
                     
                     array<float, 3> bCoords = baryCoords(A, B, C, {(float) x, (float) y});
 
@@ -173,7 +173,7 @@
 
                         float z = A.at(2) * bCoords.at(0) + B.at(2) * bCoords.at(1) + C.at(2) * bCoords.at(2);
 
-                        if (x < width && y < height) {
+                        if (x < width && y < height && x >= 0 && y >= 0) {
                             if (z < zbuffer.at(y * width + x) && abs(z) <= 1) {
                                 zbuffer.at(y * width + x) = z;
 
@@ -201,13 +201,8 @@
                                     shader_vec_args["tangent"] = tangent;
                                     shader_vec_args["bitangent"] = bitangent;
                                     //shader
-                                    std::array<float, 3> newColor = shader(shader_args, shader_vec_args, dirLight, &texture);
-                                    Color nColor = {
-                                        (u_char) (newColor.at(2) * 255),
-                                        (u_char) (newColor.at(1) * 255),
-                                        (u_char) (newColor.at(0) * 255)
-                                        };
-                                    glWPoint(x, y, &nColor);
+                                    Color newColor = shader(shader_args, shader_vec_args, dirLight, &texture);
+                                    glWPoint(x, y, &newColor);
                                 } else {
                                     glWPoint(x, y);
                             }
@@ -229,7 +224,7 @@
         glViewMatrix();
     }
 
-    void GlRender3D::glShader (std::array<float, 3> (*shader) (
+    void GlRender3D::glShader (Color (*shader) (
         std::unordered_map<std::string, float>,
         std::unordered_map<string, std::vector<float>>,
         vector<float>,
@@ -247,13 +242,13 @@
     void GlRender3D::glLookAt(vector<float> eye, vector<float> camPosition)
     {
         vector<float> forward = substract(camPosition, eye);
-        forward = divide(forward, normalize(forward));
+        forward = normalize(forward);
 
         vector<float> right = cross({0, 1, 0}, forward);
-        right = divide(right, normalize(right));
+        right = normalize(right);
 
         vector<float> up = cross(forward, right);
-        up = divide(up, normalize(up));
+        up = normalize(up);
 
         camMatrix = {{{
             {right.at(0), up.at(0), forward.at(0), camPosition.at(0)},
@@ -265,12 +260,12 @@
         viewMatrix = camMatrix.inverse();
     }
 
-    void GlRender3D::glCreateWindow(uint32_t width, uint32_t height) {
-        this->width = width;
-        this->height = height;
-        pixels.resize(width * height);
-        zbuffer.resize(width * height);
-        glViewPort(0, 0, width, height);
+    void GlRender3D::glCreateWindow(float width, float height) {
+        this->width = (uint32_t) width;
+        this->height = (uint32_t) height;
+        pixels.resize((size_t) width * height);
+        zbuffer.resize((size_t) width * height);
+        glViewPort(0, 0,width, height);
     }
 
     void GlRender3D::glClear ()

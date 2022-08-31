@@ -1,6 +1,7 @@
 #include "../include/glShaders.hpp"
+#include <sys/types.h>
 
-std::array<float, 3> flat (
+Color flat (
     const std::unordered_map<std::string, float> shader_args,
     const std::unordered_map<std::string, std::vector<float>> shader_vec_args,
     const std::vector<float> dirLight,
@@ -27,9 +28,9 @@ std::array<float, 3> flat (
         if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
             Color texColor = texture->getColor(tU, tV);
 
-            b *= texColor.B;
-            g *= texColor.G;
-            r *= texColor.R;
+            b *= (float) texColor.B;
+            g *= (float) texColor.G;
+            r *= (float) texColor.R;
         }
     }
     std::vector<float> newdirLight = negateV(dirLight);
@@ -43,5 +44,5 @@ std::array<float, 3> flat (
     g *= intensity;
     r *= intensity;
 
-    return {b, g, r};
+    return {(u_char) (r * 255), (u_char) (g * 255), (u_char) (g * 255)};
 }

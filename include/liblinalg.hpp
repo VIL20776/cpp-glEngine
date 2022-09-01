@@ -56,14 +56,13 @@ class Matrix {
             return result;
         }
 
-        template<size_t size>
-        std::array<T, size> operator * (std::array<T, size> const &v)
+        std::vector<T> operator * (std::vector<T> const &v)
         {
             if (columns != v.size()) {
                 throw std::invalid_argument("Size of v does not match the matrix number of columns.");
             }
 
-            std::array<T, size> result {};
+            std::vector<T> result (v.size());
             
             for (size_t y = 0; y < rows; y++) {
                 for (size_t x = 0; x < columns; x++) {

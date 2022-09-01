@@ -73,7 +73,7 @@
 
         Matrix<float, 4, 4> rollMat ({{
             {cos(roll), -sin(roll), 0, 0},
-            {sin(roll), cos(yaw), 0, 0},
+            {sin(roll), cos(roll), 0, 0},
             {0, 0, 1, 0},
             {0, 0, 0, 1}
         }});
@@ -107,8 +107,8 @@
 
     vector<float> GlRender3D::glTransform (const vector<float> vertex, Matrix<float, 4, 4> matrix)
     {
-        array<float, 4> v = {{vertex[0], vertex[1], vertex[2], 1}};
-        array<float, 4> vt = matrix * v;
+        vector<float> v = {{vertex[0], vertex[1], vertex[2], 1}};
+        vector<float> vt = matrix * v;
         vector<float> vf = {{vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]}};
 
         return vf;
@@ -116,8 +116,8 @@
 
     vector<float> GlRender3D::glDirTransform (const vector<float> dirVector, Matrix<float, 4, 4> rotMatrix)
     {
-        array<float, 4> v = {{dirVector[0], dirVector[1], dirVector[2], 0}};
-        array<float, 4> vt = rotMatrix * v;
+        vector<float> v = {{dirVector[0], dirVector[1], dirVector[2], 0}};
+        vector<float> vt = rotMatrix * v;
         vector<float> vf = {{vt[0], vt[1], vt[2]}};
 
         return vf;
@@ -125,8 +125,8 @@
 
     vector<float> GlRender3D::glCamTransform (const vector<float> vertex)
     {
-        array<float, 4> v = {{vertex[0], vertex[1], vertex[2], 1}};
-        array<float, 4> vt = (viewportMatrix * (projectionMatrix * (viewMatrix * v)));
+        vector<float> v = {{vertex[0], vertex[1], vertex[2], 1}};
+        vector<float> vt = (viewportMatrix * (projectionMatrix * (viewMatrix * v)));
         vector<float> vf = {{vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]}};
 
         return vf;
@@ -135,76 +135,76 @@
 
     void GlRender3D::glTriangle_bc (vector<float> A, vector<float> B, vector<float> C, 
         ObjFaceVec verts, ObjFaceVec texCoords, ObjFaceVec normals )
-        {
-            array<float, 3> Xvals = {A.at(0), B.at(0), C.at(0)};
-            array<float, 3> Yvals = {A.at(1), B.at(1), C.at(1)};
+    {
+        array<float, 3> Xvals = {A.at(0), B.at(0), C.at(0)};
+        array<float, 3> Yvals = {A.at(1), B.at(1), C.at(1)};
 
-            long minX = (long) std::round(*std::min_element(Xvals.begin(), Xvals.end()));
-            long minY = (long) std::round(*std::min_element(Yvals.begin(), Yvals.end()));
-            long maxX = (long) std::round(*std::max_element(Xvals.begin(), Xvals.end()));
-            long maxY = (long) std::round(*std::max_element(Yvals.begin(), Yvals.end()));
+        long minX = (long) std::round(*std::min_element(Xvals.begin(), Xvals.end()));
+        long minY = (long) std::round(*std::min_element(Yvals.begin(), Yvals.end()));
+        long maxX = (long) std::round(*std::max_element(Xvals.begin(), Xvals.end()));
+        long maxY = (long) std::round(*std::max_element(Yvals.begin(), Yvals.end()));
 
-            vector<float> edge1 = substract(verts.v1, verts.v0);
-            vector<float> edge2 = substract(verts.v2, verts.v0);
+        vector<float> edge1 = substract(verts.v1, verts.v0);
+        vector<float> edge2 = substract(verts.v2, verts.v0);
 
-            vector<float> triangleNormal = cross(edge1, edge2);
-            triangleNormal = normalize(triangleNormal);
+        vector<float> triangleNormal = cross(edge1, edge2);
+        triangleNormal = normalize(triangleNormal);
 
-            vector<float> deltaUV1 = substract(texCoords.v1, texCoords.v0);
-            vector<float> deltaUV2 = substract(texCoords.v2, texCoords.v0);
-            float f =   1 / (deltaUV1.at(0) * deltaUV2.at(1) - deltaUV2.at(0) * deltaUV1.at(1));
+        vector<float> deltaUV1 = substract(texCoords.v1, texCoords.v0);
+        vector<float> deltaUV2 = substract(texCoords.v2, texCoords.v0);
+        float f =   1 / (deltaUV1.at(0) * deltaUV2.at(1) - deltaUV2.at(0) * deltaUV1.at(1));
 
-            vector<float> tangent = {
-                f * (deltaUV2.at(1) * edge1.at(0) - deltaUV1.at(1) * edge2.at(0)),
-                f * (deltaUV2.at(1) * edge1.at(1) - deltaUV1.at(1) * edge2.at(1)),
-                f * (deltaUV2.at(1) * edge1.at(2) - deltaUV1.at(1) * edge2.at(2))};
+        vector<float> tangent = {
+            f * (deltaUV2.at(1) * edge1.at(0) - deltaUV1.at(1) * edge2.at(0)),
+            f * (deltaUV2.at(1) * edge1.at(1) - deltaUV1.at(1) * edge2.at(1)),
+            f * (deltaUV2.at(1) * edge1.at(2) - deltaUV1.at(1) * edge2.at(2))};
 
-            tangent = normalize(tangent);
+        tangent = normalize(tangent);
 
-            vector<float> bitangent = cross(triangleNormal, tangent);
-            bitangent = normalize(bitangent);
+        vector<float> bitangent = cross(triangleNormal, tangent);
+        bitangent = normalize(bitangent);
 
-            for (long x = minX; x < maxX; x++) {
-                for (long y = minY; y < maxY; y++) {
-                    
+        for (long x = minX; x <= maxX; x++) {
+            for (long y = minY; y <= maxY; y++) {
+                
+                if (x < width && y < height && x >= 0 && y >= 0) {
                     array<float, 3> bCoords = baryCoords(A, B, C, {(float) x, (float) y});
 
                     if (bCoords.at(0) >= 0 && bCoords.at(1) >= 0 && bCoords.at(2) >= 0) {
 
                         float z = A.at(2) * bCoords.at(0) + B.at(2) * bCoords.at(1) + C.at(2) * bCoords.at(2);
 
-                        if (x < width && y < height && x >= 0 && y >= 0) {
-                            if (z < zbuffer.at(y * width + x) && abs(z) <= 1) {
-                                zbuffer.at(y * width + x) = z;
+                        if (z < zbuffer.at(y * width + x) && abs(z) <= 1) {
+                            zbuffer.at(y * width + x) = z;
 
-                                if (!texture.empty()){
-                                    std::unordered_map<string, float> shader_args {};
-                                    std::unordered_map<string, vector<float>> shader_vec_args {};
+                            if (!texture.empty()){
+                                std::unordered_map<string, float> shader_args {};
+                                std::unordered_map<string, vector<float>> shader_vec_args {};
 
-                                    shader_args["bCoord_u"] = bCoords.at(0);
-                                    shader_args["bCoord_v"] = bCoords.at(1);
-                                    shader_args["bCoord_w"] = bCoords.at(2);
+                                shader_args["bCoord_u"] = bCoords.at(0);
+                                shader_args["bCoord_v"] = bCoords.at(1);
+                                shader_args["bCoord_w"] = bCoords.at(2);
 
-                                    shader_args["vColor_r"] = (float) point.R;
-                                    shader_args["vColor_g"] = (float) point.G;
-                                    shader_args["vColor_b"] = (float) point.B;
+                                shader_args["vColor_r"] = (float) point.R;
+                                shader_args["vColor_g"] = (float) point.G;
+                                shader_args["vColor_b"] = (float) point.B;
 
-                                    shader_vec_args["texCoords_v0"] = texCoords.v0;
-                                    shader_vec_args["texCoords_v1"] = texCoords.v1;
-                                    shader_vec_args["texCoords_v2"] = texCoords.v2;
+                                shader_vec_args["texCoords_v0"] = texCoords.v0;
+                                shader_vec_args["texCoords_v1"] = texCoords.v1;
+                                shader_vec_args["texCoords_v2"] = texCoords.v2;
 
-                                    shader_vec_args["normals_v0"] = normals.v0;
-                                    shader_vec_args["normals_v1"] = normals.v1;
-                                    shader_vec_args["normals_v2"] = normals.v2;
+                                shader_vec_args["normals_v0"] = normals.v0;
+                                shader_vec_args["normals_v1"] = normals.v1;
+                                shader_vec_args["normals_v2"] = normals.v2;
 
-                                    shader_vec_args["triangleNormal"] = triangleNormal;
-                                    shader_vec_args["tangent"] = tangent;
-                                    shader_vec_args["bitangent"] = bitangent;
-                                    //shader
-                                    Color newColor = shader(shader_args, shader_vec_args, dirLight, &texture);
-                                    glWPoint(x, y, &newColor);
-                                } else {
-                                    glWPoint(x, y);
+                                shader_vec_args["triangleNormal"] = triangleNormal;
+                                shader_vec_args["tangent"] = tangent;
+                                shader_vec_args["bitangent"] = bitangent;
+                                //shader
+                                Color newColor = shader(shader_args, shader_vec_args, dirLight, &texture);
+                                glWPoint(x, y, &newColor);
+                            } else {
+                                glWPoint(x, y);
                             }
                         }
                     }

@@ -80,7 +80,7 @@ void BmpFile::setData (std::vector<Color> data)
 
 Color BmpFile::getColor (float u, float v)
 {
-    return data.at((unsigned int) ((v * info.height) * info.width + (u * info.width)));
+    return data.at((int) (v * info.height) * info.width + (int) (u * info.width));
 }
 
 bool BmpFile::empty ()

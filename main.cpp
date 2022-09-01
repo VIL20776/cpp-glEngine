@@ -8,8 +8,8 @@
 int main() {
     GlRender3D render;
 
-    const float width = 400;
-    const float height = 200;
+    const float width = 960;
+    const float height = 540;
 
     render.glInit();
     render.glCreateWindow(width, height);
@@ -21,9 +21,9 @@ int main() {
     std::cout << "shader loaded" << endl;
     render.glLoadModel(
         "fox.obj",
-        {width/2, height/2, 0},
-        {0, 135, 0},
-        {2, 2, 2});
+        {4, -2, -9},
+        {0, 35, 0},
+        {0.05, 0.05, 0.05});
 
     render.glFinish();
 

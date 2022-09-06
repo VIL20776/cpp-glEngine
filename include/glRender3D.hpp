@@ -22,11 +22,12 @@ class GlRender3D: public GlBmpRender
 
     vector<float> zbuffer {};
     BmpFile texture = {};
+    BmpFile normalMap = {};
     Color (*shader) (
         std::unordered_map<std::string, float>,
         std::unordered_map<string, std::vector<float>>,
         vector<float>,
-        BmpFile *);
+        BmpFile *, BmpFile *);
     vector<float> dirLight {0, 0, -1};
     Matrix<float, 4, 4> camMatrix;
     Matrix<float, 4, 4> viewMatrix;
@@ -64,14 +65,19 @@ class GlRender3D: public GlBmpRender
         std::unordered_map<std::string, float>,
         std::unordered_map<string, std::vector<float>>,
         vector<float>,
+        BmpFile *,
         BmpFile *)
     );
 
     void glTexture (BmpFile texture);
 
+    void glNormalMap (BmpFile normalMap);
+
     void glLookAt (vector<float> eye, vector<float> camPosition = {0, 0, 0});
 
     void glCreateWindow(float width, float height);
+
+    void glBackground(BmpFile file);
 
     void glClear ();
 

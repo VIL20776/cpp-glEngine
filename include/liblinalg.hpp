@@ -73,6 +73,11 @@ class Matrix {
             return result;
         }
 
+        T at (size_t row, size_t column)
+        {
+            return data[row][column];
+        }
+
         // https://www.geeksforgeeks.org/finding-inverse-of-a-matrix-using-gauss-jordan-method/
         Matrix inverse ()
         {    

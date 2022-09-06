@@ -28,6 +28,12 @@ class BmpFile {
 
     Color getColor (float u, float v);
 
+    std::vector<Color> getData ();
+
+    uint32_t getWidth ();
+
+    uint32_t getHeight ();
+
     bool empty ();
 
     void save ();

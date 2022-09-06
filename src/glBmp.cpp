@@ -1,4 +1,5 @@
 #include "../include/glBmp.hpp"
+#include <cstdint>
 
 // Create base file
 BmpFile::BmpFile () {
@@ -81,6 +82,21 @@ void BmpFile::setData (std::vector<Color> data)
 Color BmpFile::getColor (float u, float v)
 {
     return data.at((int) (v * info.height) * info.width + (int) (u * info.width));
+}
+
+std::vector<Color> BmpFile::getData ()
+{
+    return data;
+}
+
+uint32_t BmpFile::getWidth ()
+{
+    return info.width;
+}
+
+uint32_t BmpFile::getHeight ()
+{
+    return info.height;
 }
 
 bool BmpFile::empty ()

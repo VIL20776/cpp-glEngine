@@ -30,6 +30,7 @@ struct BMPInfoHeader {
     uint32_t colorsUsed;
     uint32_t importantColors;
 };
+
 #pragma pack (pop)
 
 // Utility Structs

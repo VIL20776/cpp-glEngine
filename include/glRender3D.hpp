@@ -17,7 +17,7 @@
 
 class GlRender3D: public GlBmpRender
 {
-    private:
+    protected:
     // 3D rendering components
 
     vector<float> zbuffer {};

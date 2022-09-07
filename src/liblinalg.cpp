@@ -10,11 +10,38 @@ std::vector<float> substract (const std::vector<float> v0, const std::vector<flo
     return result;
 }
 
+std::vector<float> add (const std::vector<float> v0, const std::vector<float> v1)
+{
+    std::vector<float> result {};
+    for (int i = 0; i < v0.size(); i++) {
+        result.push_back(v0.at(i) + v1.at(i));
+    }
+    return result;
+}
+
 std::vector<float> divide (const std::vector<float> v0, const std::vector<float> v1)
 {
     std::vector<float> result {};
     for (int i = 0; i < v0.size(); i++) {
         result.push_back(v0.at(i) / v1.at(i));
+    }
+    return result;
+}
+
+std::vector<float> mult (const float s, const std::vector<float> v)
+{
+    std::vector<float> result {};
+    for (int i = 0; i < v.size(); i++) {
+        result.push_back(v.at(i) * s);
+    }
+    return result;
+}
+
+std::vector<float> mult (const std::vector<float> v0, const std::vector<float> v1)
+{
+    std::vector<float> result {};
+    for (int i = 0; i < v0.size(); i++) {
+        result.push_back(v0.at(i) * v1.at(i));
     }
     return result;
 }
@@ -43,6 +70,18 @@ std::vector<float> normalize (const std::vector<float> v)
 
     return result;
 }
+
+float magnitude (const std::vector<float> v)
+{
+    float magnitude = 0;
+    for (auto &i: v)
+    {
+        magnitude += std::pow(i, 2);
+    }
+
+    return sqrt(magnitude);
+}
+
 
 float dot (const std::vector<float> v0, const std::vector<float> v1)
 {

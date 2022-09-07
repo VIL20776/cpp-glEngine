@@ -161,11 +161,19 @@ class Matrix {
 
 std::vector<float> substract (const std::vector<float> v0, const std::vector<float> v1);
 
+std::vector<float> add (const std::vector<float> v0, const std::vector<float> v1);
+
 std::vector<float> divide (const std::vector<float> v0, const std::vector<float> v1);
+
+std::vector<float> mult (const float s, const std::vector<float> v);
+
+std::vector<float> mult (const std::vector<float> v0, const std::vector<float> v1);
 
 std::vector<float> cross (const std::vector<float> v0, const std::vector<float> v1);
 
 std::vector<float> normalize (const std::vector<float> v);
+
+float magnitude (const std::vector<float> v);
 
 float dot (const std::vector<float> v0, const std::vector<float> v1);
 

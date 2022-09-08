@@ -11,13 +11,13 @@ Intersect Sphere::ray_intersect (std::vector<float> orig, std::vector<float> dir
 {
     std::vector<float> L = substract(center, orig);
     float tca = dot(L, dir);
-    float d = std::pow((std::pow(magnitude(L), 2) - std::pow(tca,2)), 0.5);
+    float d = std::sqrt((std::pow(magnitude(L), 2) - std::pow(tca,2)));
 
     if (d > radius){
         return Intersect {};
     }
 
-    float thc = std::pow((std::pow(radius, 2) - std::pow(d, 2)), 0.5);
+    float thc = std::sqrt((std::pow(radius, 2) - std::pow(d, 2)));
 
     float t0 = tca - thc;
     float t1 = tca + thc;
@@ -35,4 +35,9 @@ Intersect Sphere::ray_intersect (std::vector<float> orig, std::vector<float> dir
 
     return Intersect {false, t0, P, normal, this};
 
+}
+
+Material Sphere::getMaterial()
+{
+    return this->material;
 }

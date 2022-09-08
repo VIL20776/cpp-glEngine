@@ -31,10 +31,7 @@ class Object
     public:
     virtual Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir) = 0;
 
-    Material getMaterial ()
-    {
-        return material;
-    }
+    virtual Material getMaterial () = 0;
 };
 
 class Sphere : public Object {
@@ -46,5 +43,7 @@ class Sphere : public Object {
     Sphere (std::vector<float> center, float radius, Material material);
 
     Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
+
+    Material getMaterial ();
 };
 #endif

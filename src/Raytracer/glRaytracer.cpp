@@ -101,8 +101,8 @@ void GlRaytracer::glRender ()
     for (size_t y = viewport.y; y < (viewport.y + viewport.height + 1); y++) {
         for (size_t x = viewport.x; x < (viewport.x + viewport.width + 1); x++) {
             
-            float Px = (((x + 0.5 - viewport.x) / viewport.width) * 2) - 1;
-            float Py = (((y + 0.5 - viewport.y) / viewport.height) * 2) - 1;
+            float Px = (((x + 0.5 -(float) viewport.x) / (float) viewport.width) * 2) - 1;
+            float Py = (((y + 0.5 -(float) viewport.y) / (float) viewport.height) * 2) - 1;
 
             float aspectRatio = (float) viewport.width / viewport.height;
             float t = tan((fov * M_PI/180) / 2) * nearPlane;

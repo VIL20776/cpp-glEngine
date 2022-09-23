@@ -109,6 +109,7 @@ std::vector<float> DirectionalLight::getSpecColor(Intersect intersect, std::vect
     return specColor;
 }
 
+
 float DirectionalLight::getShadowIntensity(Intersect intersect, Intersect (*scene_intersect)(std::vector<float>, std::vector<float>, Object *))
 {
     std::vector<float> light_dir = mult(-1, this->direction);

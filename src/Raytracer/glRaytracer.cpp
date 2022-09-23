@@ -1,12 +1,18 @@
 #include "../../include/Raytracer/glRaytracer.hpp"
 #include <vector>
 
+Intersect globalSceneIntersect(std::vector<float> orig, std::vector<float> dir, Object *sceneObj)
+{
+    return glrtx->scene_intersect(orig, dir, sceneObj);
+}
+
 GlRaytracer::GlRaytracer (uint32_t width, uint32_t height)
 {
     glInit();
     glCreateWindow(width, height);
     glViewPort(0, 0, width, height);
     glClear();
+    glrtx = this;
 }
 
 void GlRaytracer::addLight (Light *light)
@@ -43,12 +49,16 @@ Intersect GlRaytracer::scene_intersect (std::vector<float> orig, std::vector<flo
     return intersect;
 }
 
-std::vector<float> GlRaytracer::cast_ray (std::vector<float> orig, std::vector<float> dir, Object *sceneObj, int recursion)
+std::vector<float> GlRaytracer::cast_ray (
+    std::vector<float> orig,
+    std::vector<float> dir,
+    Object *sceneObj,
+    int recursion)
 {
     Intersect intersect = scene_intersect(orig, dir, sceneObj);
 
     if (intersect.null || recursion >= MAX_RECURSION_DEPTH) {
-        if (envMap.empty()) {
+        if (!envMap.empty()) {
             return envMap.getEnvColor(dir);
         } else {
             return {
@@ -73,8 +83,8 @@ std::vector<float> GlRaytracer::cast_ray (std::vector<float> orig, std::vector<f
                 {
                     std::vector<float> diffuseColor = light->getDiffuseColor(intersect);
                     std::vector<float> specColor = light->getSpecColor(intersect, &camPosition);
-                    Intersect (*scene_intersect)(std::vector<float> orig, std::vector<float> dir, Object *sceneObj) = scene_intersect;
-                    float shadow_intensity = light->getShadowIntensity(intersect, scene_intersect);
+                    Intersect (*sIntersect)(std::vector<float>, std::vector<float>, Object *) { globalSceneIntersect };
+                    float shadow_intensity = light->getShadowIntensity(intersect, sIntersect);
 
                     std::vector<float> lightColor = mult((1 - shadow_intensity), add(diffuseColor, specColor));
 
@@ -117,7 +127,7 @@ std::vector<float> GlRaytracer::cast_ray (std::vector<float> orig, std::vector<f
                 std::vector<float> refract = refractVector(intersect.normal, dir, material.ir);
                 std::vector<float> refractOrig = !outside ? add(intersect.point, bias): substract(intersect.point, bias);
                 vector<float> refractColor = cast_ray(intersect.point, reflect, nullptr, recursion + 1);
-                std::vector<float> finalColor = add(add(mult(kr, refractColor), mult((1 - kr), refractColor)), specColor);
+                finalColor = add(add(mult(kr, refractColor), mult((1 - kr), refractColor)), specColor);
                 break;
             }
                 

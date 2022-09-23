@@ -1,5 +1,5 @@
 #include "../include/glBmp.hpp"
-#include <cstdint>
+#include <cmath>
 
 // Create base file
 BmpFile::BmpFile () {
@@ -82,6 +82,17 @@ void BmpFile::setData (std::vector<Color> data)
 Color BmpFile::getColor (float u, float v)
 {
     return data.at((int) (v * info.height) * info.width + (int) (u * info.width));
+}
+
+std::vector<float> BmpFile::getEnvColor(std::vector<float> dir)
+{
+    dir = normalize(dir);
+
+    int x = int((std::atan2(dir.at(2), dir.at(0)) / (2 * M_PI) + 0.5) * info.width);
+    int y = int(std::acos(-dir.at(1)) / M_PI * info.height);
+
+    Color env = data.at(y * info.width + x);
+    return {(float) env.R / 255, (float) env.G / 255, (float) env.B / 255};
 }
 
 std::vector<Color> BmpFile::getData ()

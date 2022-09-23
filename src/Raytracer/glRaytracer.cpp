@@ -1,4 +1,5 @@
 #include "../../include/Raytracer/glRaytracer.hpp"
+#include <vector>
 
 GlRaytracer::GlRaytracer (uint32_t width, uint32_t height)
 {
@@ -8,7 +9,7 @@ GlRaytracer::GlRaytracer (uint32_t width, uint32_t height)
     glClear();
 }
 
-void GlRaytracer::addLight (Light light)
+void GlRaytracer::addLight (Light *light)
 {
     lights.push_back(light);
 }
@@ -16,6 +17,11 @@ void GlRaytracer::addLight (Light light)
 void GlRaytracer::addObject (Object *object)
 {
     scene.push_back(object);
+}
+
+void GlRaytracer::setEnvMap(BmpFile envMap)
+{
+    this->envMap = envMap;
 }
 
 Intersect GlRaytracer::scene_intersect (std::vector<float> orig, std::vector<float> dir, Object *sceneObj)
@@ -37,12 +43,20 @@ Intersect GlRaytracer::scene_intersect (std::vector<float> orig, std::vector<flo
     return intersect;
 }
 
-std::vector<float> GlRaytracer::cast_ray (std::vector<float> orig, std::vector<float> dir)
+std::vector<float> GlRaytracer::cast_ray (std::vector<float> orig, std::vector<float> dir, Object *sceneObj, int recursion)
 {
-    Intersect intersect = scene_intersect(orig, dir, nullptr);
+    Intersect intersect = scene_intersect(orig, dir, sceneObj);
 
-    if (intersect.null) {
-        return {};
+    if (intersect.null || recursion >= MAX_RECURSION_DEPTH) {
+        if (envMap.empty()) {
+            return envMap.getEnvColor(dir);
+        } else {
+            return {
+                (float) this->clear.R / 255,
+                (float) this->clear.B / 255,
+                (float) this->clear.G / 255,
+            };
+        }
     }
 
     Material material = intersect.sceneObj->getMaterial();
@@ -53,40 +67,61 @@ std::vector<float> GlRaytracer::cast_ray (std::vector<float> orig, std::vector<f
         material.diffuse.at(1),
         material.diffuse.at(2)};
     
-    std::vector<float> dirLightColor = {0, 0, 0};
-    std::vector<float> ambLightColor = {0, 0, 0};
+    switch (material.type) {
+            case 0: //OPAQUE
+                for (auto &light: lights)
+                {
+                    std::vector<float> diffuseColor = light->getDiffuseColor(intersect);
+                    std::vector<float> specColor = light->getSpecColor(intersect, &camPosition);
+                    Intersect (*scene_intersect)(std::vector<float> orig, std::vector<float> dir, Object *sceneObj) = scene_intersect;
+                    float shadow_intensity = light->getShadowIntensity(intersect, scene_intersect);
 
-    for (auto &light : lights) {
-        switch (light.getType()) {
-            case 0: {
-                std::vector<float> diffuseColor = {0, 0, 0};
+                    std::vector<float> lightColor = mult((1 - shadow_intensity), add(diffuseColor, specColor));
 
-                std::vector<float> light_dir = negateV(light.getDirection());
-                float intensity = dot(intersect.normal, light_dir);
-                intensity = (0 < intensity) ? intensity : 0;
-
-                diffuseColor = {
-                    intensity * light.getColor().at(0) * light.getIntensity(),
-                    intensity * light.getColor().at(1) * light.getIntensity(),
-                    intensity * light.getColor().at(2) * light.getIntensity(),
-                };
-
-                float shadow_intensity = 0;
-                Intersect shadow_intersect = scene_intersect(intersect.point, light.getDirection(), intersect.sceneObj);
-                if (!shadow_intersect.null) {
-                    shadow_intensity = 1;
+                    finalColor = add(finalColor, lightColor);
                 }
-                dirLightColor = add(dirLightColor, mult((1 - shadow_intensity), diffuseColor));
                 break;
-            }
-            case 2: {
-                ambLightColor = mult(light.getIntensity(), light.getColor());
-                break;
-            }
-        }
-    }
+            
+            case 1: //REFLECTIVE
+            {
+                std::vector<float> reflect = reflectVector(intersect.normal, mult(-1, dir));
+                vector<float> reflectColor = cast_ray(intersect.point, reflect, intersect.sceneObj, recursion + 1);
 
-    finalColor = add(dirLightColor, ambLightColor);
+                std::vector<float> specColor {0, 0, 0};
+                for (auto &light: lights)
+                {
+                    specColor = add(specColor, light->getSpecColor(intersect, &camPosition));
+                }
+                finalColor = add(reflectColor, specColor);
+                break;
+            }
+
+            case 2: //TRANSPARENT
+            {
+                bool outside = dot(dir, intersect.normal) < 0;
+                std::vector<float> bias = mult(0.001, intersect.normal);
+
+                std::vector<float> specColor = {0, 0, 0};
+                for (auto &light : lights) {
+                    specColor = add(specColor, light->getSpecColor(intersect, &camPosition));
+                }
+
+                std::vector<float> reflect = reflectVector(intersect.normal, mult(-1, dir));
+                std::vector<float> reflectOrig = outside ? add(intersect.point, bias): substract(intersect.point, bias);
+                vector<float> reflectColor = cast_ray(intersect.point, reflect, intersect.sceneObj, recursion + 1);
+
+                float kr = fresnel(intersect.normal, dir, material.ir);
+
+                if (kr >= 1) break;
+
+                std::vector<float> refract = refractVector(intersect.normal, dir, material.ir);
+                std::vector<float> refractOrig = !outside ? add(intersect.point, bias): substract(intersect.point, bias);
+                vector<float> refractColor = cast_ray(intersect.point, reflect, nullptr, recursion + 1);
+                std::vector<float> finalColor = add(add(mult(kr, refractColor), mult((1 - kr), refractColor)), specColor);
+                break;
+            }
+                
+        }
     finalColor = mult(finalColor, objectColor);
 
     float r = (1 > finalColor[0]) ? finalColor[0] : 1;
@@ -98,15 +133,15 @@ std::vector<float> GlRaytracer::cast_ray (std::vector<float> orig, std::vector<f
 
 void GlRaytracer::glRender ()
 {
+    float aspectRatio = (float) viewport.width / (float) viewport.height;
+    float t = tan((fov * M_PI/180) / 2) * nearPlane;
+    float r = t * aspectRatio;
+
     for (size_t y = viewport.y; y < (viewport.y + viewport.height + 1); y++) {
         for (size_t x = viewport.x; x < (viewport.x + viewport.width + 1); x++) {
             
-            float Px = (((x + 0.5 -(float) viewport.x) / (float) viewport.width) * 2) - 1;
-            float Py = (((y + 0.5 -(float) viewport.y) / (float) viewport.height) * 2) - 1;
-
-            float aspectRatio = (float) viewport.width / viewport.height;
-            float t = tan((fov * M_PI/180) / 2) * nearPlane;
-            float r = t * aspectRatio;
+            float Px = (((x + 0.5 - (float) viewport.x) / (float) viewport.width) * 2) - 1;
+            float Py = (((y + 0.5 - (float) viewport.y) / (float) viewport.height) * 2) - 1;
 
             Px *= r;
             Py *= r;

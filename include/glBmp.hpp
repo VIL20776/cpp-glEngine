@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "glStructs.hpp"
+#include "liblinalg.hpp"
 
 class BmpFile {
     private:
@@ -27,6 +28,8 @@ class BmpFile {
     void setData (std::vector<Color> data);
 
     Color getColor (float u, float v);
+
+    std::vector<float> getEnvColor (std::vector<float> dir);
 
     std::vector<Color> getData ();
 

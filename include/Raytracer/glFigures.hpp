@@ -6,9 +6,14 @@
 #include <vector>
 
 #include "../liblinalg.hpp"
+#include "../glBmp.hpp"
 
 const std::array<float, 3> WHITE {1, 1, 1};
 const std::array<float, 3> BLACK {0, 0, 0};
+
+const char OPAQUE = 0;
+const char REFLECTIVE = 1;
+const char TRANSPARENT = 2;
 
 class Object;
 
@@ -17,11 +22,16 @@ struct Intersect {
     float distance {};
     std::vector<float> point {};
     std::vector<float> normal {};
-    Object *sceneObj; 
+    Object *sceneObj;
+    // std::vector<float> texCoords {};
 };
 
 struct Material {
     std::array<float, 3> diffuse {WHITE};
+    float spec {1};
+    char type {OPAQUE};
+    float ir;
+    BmpFile texture;
 };
 
 class Object

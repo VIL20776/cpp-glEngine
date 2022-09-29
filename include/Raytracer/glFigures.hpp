@@ -36,6 +36,7 @@ struct Material {
 
 class Object
 {
+    protected:
     Material material;
 
     public:
@@ -47,7 +48,6 @@ class Object
 class Sphere : public Object {
     std::vector<float> center;
     float radius;
-    Material material;
 
     public:
     Sphere (std::vector<float> center, float radius, Material material);
@@ -56,4 +56,29 @@ class Sphere : public Object {
 
     Material getMaterial ();
 };
+
+class Plane: public Object {
+    std::vector<float> position;
+    std::vector<float> normal;
+
+    public:
+    Plane(std::vector<float> position, std::vector<float> normal, Material material);
+
+    Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
+
+    Material getMaterial ();
+};
+
+// Axis Aligned Bounding Box
+class MineCube: public Object {
+    private:
+    std::vector<float> size;
+    std::vector<float> position;
+    std::vector<Plane> planes;
+
+    public:
+    MineCube (std::vector<float> size, std::vector<float> position);
+
+};
+
 #endif

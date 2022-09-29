@@ -29,19 +29,8 @@ int main () {
     rtx.addLight(&amb_l);
     rtx.addLight(&dir_l);
 
-    Sphere o1 ({-1, -2, -5}, 0.8, snow);
-    Sphere r1 ({1, -2, -5}, 0.8, stone);
-    Sphere t1 ({-1, -0.3, -5}, 0.8, orange);
-    Sphere o2 ({1, -0.3, -5}, 0.8, grape);
-    Sphere r2 ({-1, 1.4, -5}, 0.8, mint);
-    Sphere t2 ({1, 1.4, -5}, 0.8, wood);
-
-    rtx.addObject(&o1);
-    rtx.addObject(&r1);
-    rtx.addObject(&t1);
-    rtx.addObject(&o2);
-    rtx.addObject(&r2);
-    rtx.addObject(&t2);
+    Plane p ({0, -10, 0}, {0,1,0}, grape);
+    rtx.addObject(&p);
 
     rtx.glRender();
 

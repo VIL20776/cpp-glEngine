@@ -80,7 +80,7 @@ std::vector<float> DirectionalLight::getDiffuseColor(Intersect intersect)
     std::vector<float> lightDir = mult(-1, this->direction);
 
     float intensity = dot(intersect.normal, lightDir) * this->intensity;
-    intensity = (0 > intensity) ? 0: intensity;
+    intensity = std::max((float) 0, intensity);
 
     std::vector<float> diffuseColor = {{
         intensity * color.at(0),

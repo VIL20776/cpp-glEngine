@@ -74,11 +74,17 @@ class MineCube: public Object {
     private:
     std::vector<float> size;
     std::vector<float> position;
-    std::vector<Plane> planes;
+    std::vector<Plane> planes {};
+
+    std::vector<float> boundMin {0, 0, 0};
+    std::vector<float> boundMax {0, 0, 0};
 
     public:
-    MineCube (std::vector<float> size, std::vector<float> position);
+    MineCube (std::vector<float> size, std::vector<float> position, Material material);
 
+    Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
+
+    Material getMaterial ();
 };
 
 #endif

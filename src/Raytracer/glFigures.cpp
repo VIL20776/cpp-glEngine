@@ -76,29 +76,32 @@ Material Plane::getMaterial()
 }
 
 
-MineCube::MineCube (std::vector<float> size, std::vector<float> position)
+MineCube::MineCube (std::vector<float> size, std::vector<float> position, Material material)
 {
+    this->position = position;
+    this->size = size;
+    this->material = material;
 
-    float halfSizeX = size.at(0) / 2;
-    float halfSizeY = size.at(1) / 2;
-    float halfSizeZ = size.at(2) / 2;
+    std::vector<float> halfSizes {
+        size.at(0) / 2,
+        size.at(1) / 2,
+        size.at(2) / 2,
+    };
 
-    this->planes.push_back(Plane (add(position, {halfSizeX, 0, 0}), {1, 0, 0}, material));
-    this->planes.push_back(Plane (add(position, {-halfSizeX, 0, 0}), {-1, 0, 0}, material));
+    this->planes.push_back(Plane (add(position, {halfSizes.at(0), 0, 0}), {1, 0, 0}, material));
+    this->planes.push_back(Plane (add(position, {-halfSizes.at(0), 0, 0}), {-1, 0, 0}, material));
 
-    this->planes.push_back(Plane (add(position, {0, halfSizeY, 0}), {1, 0, 0}, material));
-    this->planes.push_back(Plane (add(position, {0, -halfSizeY, 0}), {-1, 0, 0}, material));
+    this->planes.push_back(Plane (add(position, {0, halfSizes.at(1), 0}), {0, 1, 0}, material));
+    this->planes.push_back(Plane (add(position, {0, -halfSizes.at(1), 0}), {0, -1, 0}, material));
 
-    this->planes.push_back(Plane (add(position, {halfSizeX, 0, 0}), {1, 0, 0}, material));
-    this->planes.push_back(Plane (add(position, {-halfSizeX, 0, 0}), {-1, 0, 0}, material));
-
-    std::vector<float> boundMin = {0, 0, 0};
-    std::vector<float> boundMax = {0, 0, 0};
+    this->planes.push_back(Plane (add(position, {0, 0, halfSizes.at(2)}), {0, 0, 1}, material));
+    this->planes.push_back(Plane (add(position, {0, 0, -halfSizes.at(2)}), {0, 0, -1}, material));
 
     float epsilon = 0.0001;
 
     for (size_t i = 0; i < 3; i++) {
-        
+        this->boundMin[i] = position[i] - (epsilon + halfSizes.at(i));
+        this->boundMax[i] = position[i] + (epsilon + halfSizes.at(i));
     }
 }
 
@@ -110,10 +113,27 @@ Intersect MineCube::ray_intersect(std::vector<float> orig, std::vector<float> di
         Intersect planeInter = plane.ray_intersect(orig, dir);
         if (!planeInter.null) {
             std::vector<float> planePoint = planeInter.point;
-            if ()
-            {
-                
-            }
+            if (boundMin.at(0) <= planePoint.at(0) && boundMax.at(0) >= planePoint.at(0))
+                if (boundMin.at(1) <= planePoint.at(1) && boundMax.at(1) >= planePoint.at(1))
+                    if (boundMin.at(2) <= planePoint.at(2) && boundMax.at(2) >= planePoint.at(2))
+                    {
+                        if (planeInter.distance < t) {
+                            t = planeInter.distance;
+                            intersect = planeInter;
+                        }
+                    }
+
         }
     }
+
+    if (intersect.null) {
+        return intersect;
+    }
+
+    return {false, t, intersect.point, intersect.normal, this};
+}
+
+Material MineCube::getMaterial()
+{
+    return this->material;
 }

@@ -177,10 +177,13 @@ float PointLight::getShadowIntensity(Intersect intersect, Intersect (*scene_inte
 {
     std::vector<float> light_dir = substract(this->point, intersect.point);
     light_dir = normalize(light_dir);
+    float light_distance = magnitude(light_dir);
 
     float shadow_intensity = 0;
     Intersect shadow_intersect = scene_intersect(intersect.point, light_dir, intersect.sceneObj);
-    if (!shadow_intersect.null) shadow_intensity = 1;
+    if (!shadow_intersect.null) 
+        if (shadow_intersect.distance < light_distance)
+            shadow_intensity = 1;
 
     return shadow_intensity;
 }

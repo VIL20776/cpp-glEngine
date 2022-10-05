@@ -1,6 +1,7 @@
 #include "../../include/Raytracer/glFigures.hpp"
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 Sphere::Sphere (std::vector<float> center, float radius, Material material)
 {
@@ -136,4 +137,45 @@ Intersect MineCube::ray_intersect(std::vector<float> orig, std::vector<float> di
 Material MineCube::getMaterial()
 {
     return this->material;
+}
+
+Triangle::Triangle(std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material)
+{
+    this->A = A;
+    this->B = B;
+    this->C = C;
+
+    std::vector<float> edge1 = substract(B, A);
+    std::vector<float> edge2 = substract(C, A);
+
+    std::vector<float> triangleNormal = cross(edge1, edge2);
+    triangleNormal = normalize(triangleNormal);
+
+    this->plane = {{},triangleNormal, material};
+}
+
+Intersect Triangle::ray_intersect(std::vector<float> orig, std::vector<float> dir)
+{
+    float t = INFINITY;
+    Intersect planeInter = plane.ray_intersect(orig, dir);
+    if (!planeInter.null) {
+            std::vector<float> planePoint = planeInter.point;
+
+            std::array<float, 3> Xvals = {A.at(0), B.at(0), C.at(0)};
+            std::array<float, 3> Yvals = {A.at(1), B.at(1), C.at(1)};
+
+            long minX = (long) std::round(*std::min_element(Xvals.begin(), Xvals.end()));
+            long minY = (long) std::round(*std::min_element(Yvals.begin(), Yvals.end()));
+            long maxX = (long) std::round(*std::max_element(Xvals.begin(), Xvals.end()));
+            long maxY = (long) std::round(*std::max_element(Yvals.begin(), Yvals.end()));
+
+            for (long x = minX; x <= maxX; x++) {
+                for (long y = minY; y <= maxY; y++) {
+                    std::array<float, 3> bCoords = baryCoords(A, B, C, {(float) x, (float) y});
+
+                    if (bCoords.at(0) >= 0 && bCoords.at(1) >= 0 && bCoords.at(2) >= 0) {
+
+                        float z = A.at(2) * bCoords.at(0) + B.at(2) * bCoords.at(1) + C.at(2) * bCoords.at(2);
+
+
 }

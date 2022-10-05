@@ -87,4 +87,19 @@ class MineCube: public Object {
     Material getMaterial ();
 };
 
+class Triangle: public Object {
+    private:
+    std::vector<float> A, B, C;
+    Plane plane;
+
+    std::array<float, 3> baryCoords (std::vector<float> A, std::vector<float> B, std::vector<float> C, std::array<float, 2> P);
+
+    public:
+    Triangle (std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material);
+
+    Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
+
+    Material getMaterial ();
+};
+
 #endif

@@ -15,37 +15,34 @@ int main () {
     Material mint {{0.26, 0.37, 0.32}, 64, REFLECTIVE};
     Material wood {{0.52, 0.37, 0.26}, 64, TRANSPARENT, 1.5};
 
+    Material obama {
+        .texture = BmpFile ("data/obama.bmp")
+    };
 
     GlRaytracer rtx {width, height};
 
     rtx.glClearColor(0.5, 0.5, 0.5);
     rtx.glClear();
 
-    rtx.setEnvMap(BmpFile("data/Raytracer/panoramic-beach.bmp"));
+    // rtx.setEnvMap(BmpFile("data/Raytracer/panoramic-beach.bmp"));
 
     AmbientLight amb_l = {0.2};
-    PointLight point_l = {{0, 0, -5}};
+    DirectionalLight dir_l = {{-1, -1, -1}};
 
     rtx.addLight(&amb_l);
-    rtx.addLight(&point_l);
+    rtx.addLight(&dir_l);
 
-    Plane p1 ({0, -10, 0}, {0,1,0}, snow);
-    Plane p2 ({0, 10, 0}, {0,-1,0}, snow);
-    Plane p3 ({-10, 0, 0}, {1,0,0}, snow);
-    Plane p4 ({10, 0, 0}, {-1,0,0}, snow);
-    Plane p5 ({0, 0, -50}, {0,0,1}, snow);
+    Triangle t0 ({2, -1, -10}, {-2, -1, -10}, {0, 2, -10}, grape);
+    Triangle t1 ({2, 1, -5}, {-2, 1, -5}, {0, 5, -5}, mint);
+    Triangle t2 ({2, -3, -15}, {-2, -3, -15}, {0, 0, -15}, wood);
 
-    rtx.addObject(&p1);
-    rtx.addObject(&p2);
-    rtx.addObject(&p3);
-    rtx.addObject(&p4);
-    rtx.addObject(&p5);
+    Sphere s ({0, 0, -5}, 0.5, obama);
+    rtx.addObject(&s);
 
-    MineCube c1 ({2, 2, 2}, {-3, -2, -10}, stone);
-    MineCube c2 ({2, 2, 2}, {3, -2, -10}, mint);
+    // rtx.addObject(&t0);
+    // rtx.addObject(&t1);
+    // rtx.addObject(&t2);
 
-    rtx.addObject(&c1);
-    rtx.addObject(&c2);
 
 
     rtx.glRender();

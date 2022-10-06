@@ -79,9 +79,13 @@ void BmpFile::setData (std::vector<Color> data)
     this->data = data;
 }
 
-Color BmpFile::getColor (float u, float v)
+std::vector<float> BmpFile::getColor (float u, float v)
 {
-    return data.at((int) (v * info.height) * info.width + (int) (u * info.width));
+    if (std::abs(u) > 1 || std::abs(v) > 1) {
+        return {};
+    }
+    Color color = data.at((int) (v * info.height) * info.width + (int) (u * info.width));
+    return {(float) color.R / 255, (float) color.G / 255, (float) color.B / 255};
 }
 
 std::vector<float> BmpFile::getEnvColor(std::vector<float> dir)

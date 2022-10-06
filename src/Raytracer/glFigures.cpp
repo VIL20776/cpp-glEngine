@@ -3,6 +3,11 @@
 #include <vector>
 #include <algorithm>
 
+Material Object::getMaterial()
+{
+    return this->material;
+}
+
 Sphere::Sphere (std::vector<float> center, float radius, Material material)
 {
     this->center = center;
@@ -36,13 +41,13 @@ Intersect Sphere::ray_intersect (std::vector<float> orig, std::vector<float> dir
     std::vector<float> normal = substract(P, center);
     normal = normalize(normal);
 
-    return Intersect {false, t0, P, normal, this};
+    int u = 1 - int((std::atan2(dir.at(2), dir.at(0)) / (2 * M_PI) + 0.5)); 
+    int v = int(std::acos(-dir.at(1)) / M_PI);
 
-}
+    std::vector<int> uvs {u, v};
 
-Material Sphere::getMaterial()
-{
-    return this->material;
+    return Intersect {false, t0, P, normal, this, uvs};
+
 }
 
 Plane::Plane(std::vector<float> position, std::vector<float> normal, Material material)
@@ -70,12 +75,6 @@ Intersect Plane::ray_intersect(std::vector<float> orig, std::vector<float> dir)
 
     return Intersect {false, t, P, normal, this};
 }
-
-Material Plane::getMaterial()
-{
-    return this->material;
-}
-
 
 MineCube::MineCube (std::vector<float> size, std::vector<float> position, Material material)
 {
@@ -134,12 +133,8 @@ Intersect MineCube::ray_intersect(std::vector<float> orig, std::vector<float> di
     return {false, t, intersect.point, intersect.normal, this};
 }
 
-Material MineCube::getMaterial()
-{
-    return this->material;
-}
-
-Triangle::Triangle(std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material)
+Triangle::Triangle(std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material) :
+    plane({}, {}, {})
 {
     this->A = A;
     this->B = B;
@@ -151,31 +146,46 @@ Triangle::Triangle(std::vector<float> A, std::vector<float> B, std::vector<float
     std::vector<float> triangleNormal = cross(edge1, edge2);
     triangleNormal = normalize(triangleNormal);
 
-    this->plane = {{},triangleNormal, material};
+    std::vector<float> center = divide(add(A, add(B, C)), {3, 3, 3});
+
+    this->plane = {center,triangleNormal, material};
+
+    this->material = material;
 }
 
 Intersect Triangle::ray_intersect(std::vector<float> orig, std::vector<float> dir)
 {
-    float t = INFINITY;
+    Intersect intersect {};
     Intersect planeInter = plane.ray_intersect(orig, dir);
     if (!planeInter.null) {
-            std::vector<float> planePoint = planeInter.point;
+        return {};
+    }
 
-            std::array<float, 3> Xvals = {A.at(0), B.at(0), C.at(0)};
-            std::array<float, 3> Yvals = {A.at(1), B.at(1), C.at(1)};
+    std::vector<float> planePoint = planeInter.point;
+    std::vector<float> planeNormal = planeInter.normal;
 
-            long minX = (long) std::round(*std::min_element(Xvals.begin(), Xvals.end()));
-            long minY = (long) std::round(*std::min_element(Yvals.begin(), Yvals.end()));
-            long maxX = (long) std::round(*std::max_element(Xvals.begin(), Xvals.end()));
-            long maxY = (long) std::round(*std::max_element(Yvals.begin(), Yvals.end()));
+    // Step 2: inside-outside test
+    std::vector<float> P;  //vector perpendicular to triangle's plane 
 
-            for (long x = minX; x <= maxX; x++) {
-                for (long y = minY; y <= maxY; y++) {
-                    std::array<float, 3> bCoords = baryCoords(A, B, C, {(float) x, (float) y});
+    // edge 0
+    std::vector<float> edge0 = substract(B, A); 
+    std::vector<float> vp0 = substract(planePoint, A); 
+    P = cross(edge0,vp0); 
+    if ( dot(planeNormal, P ) < 0) return {};  
 
-                    if (bCoords.at(0) >= 0 && bCoords.at(1) >= 0 && bCoords.at(2) >= 0) {
+    // edge 1
+    std::vector<float> edge1 = substract(C, B); 
+    std::vector<float> vp1 = substract(planePoint, B); 
+    P = cross(edge1, vp1); 
+    if ( dot(planeNormal, P ) < 0)  return {}; 
 
-                        float z = A.at(2) * bCoords.at(0) + B.at(2) * bCoords.at(1) + C.at(2) * bCoords.at(2);
+    // edge 2
+    std::vector<float> edge2 = substract(A, C); 
+    std::vector<float> vp2 = substract(planePoint, C); 
+    P = cross(edge2, vp2); 
+    if ( dot(planeNormal, P ) < 0) return {};  
 
+    intersect = planeInter;
 
+    return {false, intersect.distance, intersect.point, intersect.normal, this};
 }

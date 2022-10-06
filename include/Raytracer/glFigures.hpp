@@ -23,7 +23,7 @@ struct Intersect {
     std::vector<float> point {};
     std::vector<float> normal {};
     Object *sceneObj;
-    // std::vector<float> texCoords {};
+    std::vector<int> texCoords {};
 };
 
 struct Material {
@@ -31,7 +31,7 @@ struct Material {
     float spec {1};
     char type {OPAQUE};
     float ir;
-    BmpFile texture;
+    BmpFile texture {};
 };
 
 class Object
@@ -42,7 +42,7 @@ class Object
     public:
     virtual Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir) = 0;
 
-    virtual Material getMaterial () = 0;
+    virtual Material getMaterial ();
 };
 
 class Sphere : public Object {
@@ -53,11 +53,10 @@ class Sphere : public Object {
     Sphere (std::vector<float> center, float radius, Material material);
 
     Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
-
-    Material getMaterial ();
 };
 
 class Plane: public Object {
+    private:
     std::vector<float> position;
     std::vector<float> normal;
 
@@ -65,8 +64,6 @@ class Plane: public Object {
     Plane(std::vector<float> position, std::vector<float> normal, Material material);
 
     Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
-
-    Material getMaterial ();
 };
 
 // Axis Aligned Bounding Box
@@ -83,8 +80,6 @@ class MineCube: public Object {
     MineCube (std::vector<float> size, std::vector<float> position, Material material);
 
     Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
-
-    Material getMaterial ();
 };
 
 class Triangle: public Object {
@@ -92,14 +87,10 @@ class Triangle: public Object {
     std::vector<float> A, B, C;
     Plane plane;
 
-    std::array<float, 3> baryCoords (std::vector<float> A, std::vector<float> B, std::vector<float> C, std::array<float, 2> P);
-
     public:
     Triangle (std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material);
 
     Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
-
-    Material getMaterial ();
 };
 
 #endif

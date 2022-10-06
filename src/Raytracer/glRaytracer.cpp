@@ -1,4 +1,5 @@
 #include "../../include/Raytracer/glRaytracer.hpp"
+#include <algorithm>
 #include <vector>
 
 Intersect globalSceneIntersect(std::vector<float> orig, std::vector<float> dir, Object *sceneObj)
@@ -134,9 +135,14 @@ std::vector<float> GlRaytracer::cast_ray (
         }
     finalColor = mult(finalColor, objectColor);
 
-    float r = (1 > finalColor[0]) ? finalColor[0] : 1;
-    float g = (1 > finalColor[1]) ? finalColor[1] : 1;
-    float b = (1 > finalColor[2]) ? finalColor[2] : 1;
+    if (!material.texture.empty() && !intersect.texCoords.empty()) {
+        vector<float> texColor = material.texture.getColor(intersect.texCoords.at(0), intersect.texCoords.at(1));
+        finalColor = mult(finalColor, texColor);
+    }
+
+    float r = std::min((float) 1, finalColor.at(0));
+    float g = std::min((float) 1, finalColor.at(1));
+    float b = std::min((float) 1, finalColor.at(2));
 
     return {r, g, b};
 }

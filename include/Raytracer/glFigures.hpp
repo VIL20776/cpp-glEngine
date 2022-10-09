@@ -23,7 +23,7 @@ struct Intersect {
     std::vector<float> point {};
     std::vector<float> normal {};
     Object *sceneObj;
-    std::vector<int> texCoords {};
+    std::vector<float> texCoords {};
 };
 
 struct Material {

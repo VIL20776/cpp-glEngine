@@ -15,8 +15,11 @@ int main () {
     Material mint {{0.26, 0.37, 0.32}, 64, REFLECTIVE};
     Material wood {{0.52, 0.37, 0.26}, 64, TRANSPARENT, 1.5};
 
+    Material glass {{0.9, 0.9, 0.9}, 64, TRANSPARENT, 1.5};
+
     Material obama {
-        .texture = BmpFile ("data/obama.bmp")
+        .spec = 16,
+        .texture = BmpFile ("data/mandala.bmp")
     };
 
     GlRaytracer rtx {width, height};
@@ -24,25 +27,24 @@ int main () {
     rtx.glClearColor(0.5, 0.5, 0.5);
     rtx.glClear();
 
-    // rtx.setEnvMap(BmpFile("data/Raytracer/panoramic-beach.bmp"));
+    rtx.setEnvMap(BmpFile("data/Raytracer/panoramic-beach.bmp"));
 
     AmbientLight amb_l = {0.2};
-    DirectionalLight dir_l = {{-1, -1, -1}};
+    DirectionalLight dir_l = {{-1, -1, -1}, 0.9};
 
     rtx.addLight(&amb_l);
     rtx.addLight(&dir_l);
 
-    Triangle t0 ({2, -1, -10}, {-2, -1, -10}, {0, 2, -10}, grape);
-    Triangle t1 ({2, 1, -5}, {-2, 1, -5}, {0, 5, -5}, mint);
-    Triangle t2 ({2, -3, -15}, {-2, -3, -15}, {0, 0, -15}, wood);
+    Triangle t0 ({2, 1, -10}, {-2, 1, -10}, {0, 5, -10}, grape);
+    Triangle t1 ({0, -3, -10}, {4, -3, -10}, {2, 1, -10}, stone);
+    Triangle t2 ({-4, -3, -10}, {0, -3, -10}, {-2, 1, -10}, orange);
 
-    Sphere s ({0, 0, -5}, 0.5, obama);
-    rtx.addObject(&s);
+    // Sphere s ({0, 0, -5}, 0.5, obama);
+    // rtx.addObject(&s);
 
-    // rtx.addObject(&t0);
-    // rtx.addObject(&t1);
-    // rtx.addObject(&t2);
-
+    rtx.addObject(&t0);
+    rtx.addObject(&t1);
+    rtx.addObject(&t2);
 
 
     rtx.glRender();

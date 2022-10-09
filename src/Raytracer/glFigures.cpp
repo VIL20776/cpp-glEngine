@@ -41,10 +41,10 @@ Intersect Sphere::ray_intersect (std::vector<float> orig, std::vector<float> dir
     std::vector<float> normal = substract(P, center);
     normal = normalize(normal);
 
-    int u = 1 - int((std::atan2(dir.at(2), dir.at(0)) / (2 * M_PI) + 0.5)); 
-    int v = int(std::acos(-dir.at(1)) / M_PI);
+    float u = 1 - (std::atan2(normal.at(2), normal.at(0)) / (2 * M_PI) + 0.5); 
+    float v = std::acos(-normal.at(1)) / M_PI;
 
-    std::vector<int> uvs {u, v};
+    std::vector<float> uvs {u, v};
 
     return Intersect {false, t0, P, normal, this, uvs};
 
@@ -134,8 +134,25 @@ Intersect MineCube::ray_intersect(std::vector<float> orig, std::vector<float> di
 }
 
 Triangle::Triangle(std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material) :
-    plane({}, {}, {})
+    plane({}, {}, material)
 {
+    std::vector<float> temp;
+    if (A.at(1) < B.at(1)) {
+        temp = A;
+        A = B;
+        B = temp;
+    }
+    if (A.at(1) < C.at(1)) {
+        temp = A;
+        A = C;
+        C = temp;
+    }
+    if (B.at(1) < C.at(1)) {
+        temp = B;
+        B = C;
+        C = temp;
+    }
+
     this->A = A;
     this->B = B;
     this->C = C;
@@ -157,35 +174,38 @@ Intersect Triangle::ray_intersect(std::vector<float> orig, std::vector<float> di
 {
     Intersect intersect {};
     Intersect planeInter = plane.ray_intersect(orig, dir);
-    if (!planeInter.null) {
-        return {};
-    }
 
     std::vector<float> planePoint = planeInter.point;
     std::vector<float> planeNormal = planeInter.normal;
 
-    // Step 2: inside-outside test
-    std::vector<float> P;  //vector perpendicular to triangle's plane 
+    if (!planeInter.null) {
+        // Step 2: inside-outside test
+        std::vector<float> P;  //vector perpendicular to triangle's plane 
 
-    // edge 0
-    std::vector<float> edge0 = substract(B, A); 
-    std::vector<float> vp0 = substract(planePoint, A); 
-    P = cross(edge0,vp0); 
-    if ( dot(planeNormal, P ) < 0) return {};  
+        // edge 0
+        std::vector<float> edge0 = substract(B, A); 
+        std::vector<float> vp0 = substract(planePoint, A); 
+        P = cross(edge0,vp0); 
+        if ( dot(planeNormal, P ) < 0) return {};  
 
-    // edge 1
-    std::vector<float> edge1 = substract(C, B); 
-    std::vector<float> vp1 = substract(planePoint, B); 
-    P = cross(edge1, vp1); 
-    if ( dot(planeNormal, P ) < 0)  return {}; 
+        // edge 1
+        std::vector<float> edge1 = substract(C, B); 
+        std::vector<float> vp1 = substract(planePoint, B); 
+        P = cross(edge1, vp1); 
+        if ( dot(planeNormal, P ) < 0)  return {}; 
 
-    // edge 2
-    std::vector<float> edge2 = substract(A, C); 
-    std::vector<float> vp2 = substract(planePoint, C); 
-    P = cross(edge2, vp2); 
-    if ( dot(planeNormal, P ) < 0) return {};  
+        // edge 2
+        std::vector<float> edge2 = substract(A, C); 
+        std::vector<float> vp2 = substract(planePoint, C); 
+        P = cross(edge2, vp2); 
+        if ( dot(planeNormal, P ) < 0) return {};  
 
-    intersect = planeInter;
+        intersect = planeInter;
+    }
+
+    if (intersect.null) {
+        return {};
+    }
 
     return {false, intersect.distance, intersect.point, intersect.normal, this};
 }

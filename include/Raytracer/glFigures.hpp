@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "../liblinalg.hpp"
-#include "../glBmp.hpp"
+#include "../glRender3D.hpp"
 
 const std::array<float, 3> WHITE {1, 1, 1};
 const std::array<float, 3> BLACK {0, 0, 0};
@@ -89,6 +89,16 @@ class Triangle: public Object {
 
     public:
     Triangle (std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material);
+
+    Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
+};
+
+class Model: public Object, public GlRender3D {
+    private:
+    std::vector<Triangle> model;
+
+    public:
+    Model (std::vector<Triangle> model, Material material);
 
     Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
 };

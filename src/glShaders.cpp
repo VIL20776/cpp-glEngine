@@ -25,18 +25,18 @@ Color flat (
 
     const std::vector<float> triangleNormal = shader_vec_args.at("triangleNormal");
 
-    if (texture != nullptr) {
-        float tU = tA[0] * u + tB[0] * v + tC[0] * w;
-        float tV = tA[1] * u + tB[1] * v + tC[1] * w;
+    // if (texture != nullptr) {
+    //     float tU = tA[0] * u + tB[0] * v + tC[0] * w;
+    //     float tV = tA[1] * u + tB[1] * v + tC[1] * w;
 
-        if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
-            Color texColor = texture->getColor(tU, tV);
+    //     if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
+    //         Color texColor = texture->getColor(tU, tV);
 
-            b *= (float) texColor.B / 255;
-            g *= (float) texColor.G / 255;
-            r *= (float) texColor.R / 255;
-        }
-    }
+    //         b *= (float) texColor.B / 255;
+    //         g *= (float) texColor.G / 255;
+    //         r *= (float) texColor.R / 255;
+    //     }
+    // }
     float intensity = dot(triangleNormal, negateV(dirLight));
 
     if (intensity <= 0) {
@@ -77,13 +77,13 @@ Color noise (
         float tU = tA[0] * u + tB[0] * v + tC[0] * w;
         float tV = tA[1] * u + tB[1] * v + tC[1] * w;
 
-        if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
-            Color texColor = texture->getColor(tU, tV);
+        // if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
+        //     Color texColor = texture->getColor(tU, tV);
 
-            b *= (float) texColor.B / 255;
-            g *= (float) texColor.G / 255;
-            r *= (float) texColor.R / 255;
-        }
+        //     b *= (float) texColor.B / 255;
+        //     g *= (float) texColor.G / 255;
+        //     r *= (float) texColor.R / 255;
+        // }
     }
     
     std::vector<float> triangleNormal {{
@@ -141,11 +141,11 @@ Color light(
         float tV = tA[1] * u + tB[1] * v + tC[1] * w;
 
         if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
-            Color texColor = texture->getColor(tU, tV);
+            std::vector<float> texColor = texture->getColor(tU, tV);
 
-            b *= (float) texColor.B / 255;
-            g *= (float) texColor.G / 255;
-            r *= (float) texColor.R / 255;
+            b *= texColor.at(0);
+            g *= texColor.at(1);
+            r *= texColor.at(2);
         }
     }
     
@@ -199,18 +199,18 @@ Color gray(
 
     const std::vector<float> forward = shader_vec_args.at("forwardVector");
 
-    if (texture != nullptr) {
-        float tU = tA[0] * u + tB[0] * v + tC[0] * w;
-        float tV = tA[1] * u + tB[1] * v + tC[1] * w;
+    // if (texture != nullptr) {
+    //     float tU = tA[0] * u + tB[0] * v + tC[0] * w;
+    //     float tV = tA[1] * u + tB[1] * v + tC[1] * w;
 
-        if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
-            Color texColor = texture->getColor(tU, tV);
+    // //     if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
+    // //         // Color texColor = texture->getColor(tU, tV);
 
-            b *= (float) texColor.B / 255;
-            g *= (float) texColor.G / 255;
-            r *= (float) texColor.R / 255;
-        }
-    }
+    // //         b *= (float) texColor.B / 255;
+    // //         g *= (float) texColor.G / 255;
+    // //         r *= (float) texColor.R / 255;
+    // //     }
+    // }
     
     std::vector<float> triangleNormal {{
         nA[0] * u + nB[0] * v + nC[0] * w,
@@ -255,18 +255,18 @@ Color RTC (
     const std::vector<float> nB = shader_vec_args.at("normals_v1");
     const std::vector<float> nC = shader_vec_args.at("normals_v2");
 
-    if (texture != nullptr) {
-        float tU = tA[0] * u + tB[0] * v + tC[0] * w;
-        float tV = tA[1] * u + tB[1] * v + tC[1] * w;
+    // if (texture != nullptr) {
+    //     float tU = tA[0] * u + tB[0] * v + tC[0] * w;
+    //     float tV = tA[1] * u + tB[1] * v + tC[1] * w;
 
-        if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
-            Color texColor = texture->getColor(tU, tV);
+    //     if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
+    //         Color texColor = texture->getColor(tU, tV);
 
-            b *= (float) texColor.B / 255;
-            g *= (float) texColor.G / 255;
-            r *= (float) texColor.R / 255;
-        }
-    }
+    //         b *= (float) texColor.B / 255;
+    //         g *= (float) texColor.G / 255;
+    //         r *= (float) texColor.R / 255;
+    //     }
+    // }
     
     std::vector<float> triangleNormal {{
         nA[0] * u + nB[0] * v + nC[0] * w,
@@ -312,18 +312,18 @@ Color fried(
 
     const std::vector<float> forward = shader_vec_args.at("forwardVector");
 
-    if (texture != nullptr) {
-        float tU = tA[0] * u + tB[0] * v + tC[0] * w;
-        float tV = tA[1] * u + tB[1] * v + tC[1] * w;
+    // if (texture != nullptr) {
+    //     float tU = tA[0] * u + tB[0] * v + tC[0] * w;
+    //     float tV = tA[1] * u + tB[1] * v + tC[1] * w;
 
-        if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
-            Color texColor = texture->getColor(tU, tV);
+    //     if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
+    //         Color texColor = texture->getColor(tU, tV);
 
-            b *= (float) texColor.B / 255;
-            g *= (float) texColor.G / 255;
-            r *= (float) texColor.R / 255;
-        }
-    }
+    //         b *= (float) texColor.B / 255;
+    //         g *= (float) texColor.G / 255;
+    //         r *= (float) texColor.R / 255;
+    //     }
+    // }
     
     std::vector<float> triangleNormal {{
         nA[0] * u + nB[0] * v + nC[0] * w,
@@ -379,15 +379,15 @@ Color normalMap (
     float tU = tA[0] * u + tB[0] * v + tC[0] * w;
     float tV = tA[1] * u + tB[1] * v + tC[1] * w;
 
-    if (texture != nullptr) {
-        if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
-            Color texColor = texture->getColor(tU, tV);
+    // if (texture != nullptr) {
+    //     if (tU >= 0 && tV >= 0 && tU < 1 && tV < 1) {
+    //         Color texColor = texture->getColor(tU, tV);
 
-            b *= (float) texColor.B / 255;
-            g *= (float) texColor.G / 255;
-            r *= (float) texColor.R / 255;
-        }
-    }
+    //         b *= (float) texColor.B / 255;
+    //         g *= (float) texColor.G / 255;
+    //         r *= (float) texColor.R / 255;
+    //     }
+    // }
 
     std::vector<float> triangleNormal {{
         nA[0] * u + nB[0] * v + nC[0] * w,
@@ -396,31 +396,31 @@ Color normalMap (
     }};
 
     float intensity {};
-    if (normalMap != nullptr) {
-        Color tex = normalMap->getColor(tU, tV);
-        std::vector<float> texNormal {{(float) tex.R / 255, (float) tex.G / 255, (float) tex.B / 255}};
+    // if (normalMap != nullptr) {
+    //     // Color tex = normalMap->getColor(tU, tV);
+    //     // std::vector<float> texNormal {{(float) tex.R / 255, (float) tex.G / 255, (float) tex.B / 255}};
 
-        texNormal = {
-            (texNormal[0] * 2) - 1,
-            (texNormal[1] * 2) - 1,
-            (texNormal[2] * 2) - 1
-            };
+    //     texNormal = {
+    //         (texNormal[0] * 2) - 1,
+    //         (texNormal[1] * 2) - 1,
+    //         (texNormal[2] * 2) - 1
+    //         };
 
-        texNormal = normalize(texNormal);
+    //     texNormal = normalize(texNormal);
 
-        Matrix<float, 3, 3> tangentMatrix {{{
-            {tangent[0], bitangent[0], triangleNormal[0]},
-            {tangent[1], bitangent[1], triangleNormal[1]},
-            {tangent[2], bitangent[2], triangleNormal[2]}
-        }}};
+    //     Matrix<float, 3, 3> tangentMatrix {{{
+    //         {tangent[0], bitangent[0], triangleNormal[0]},
+    //         {tangent[1], bitangent[1], triangleNormal[1]},
+    //         {tangent[2], bitangent[2], triangleNormal[2]}
+    //     }}};
 
-        texNormal = tangentMatrix * texNormal;
-        texNormal = normalize(texNormal);
+    //     texNormal = tangentMatrix * texNormal;
+    //     texNormal = normalize(texNormal);
 
-        intensity = dot(texNormal, negateV(dirLight));
-    } else {
-        intensity = dot(triangleNormal, negateV(dirLight));
-    }
+    //     intensity = dot(texNormal, negateV(dirLight));
+    // } else {
+    //     intensity = dot(triangleNormal, negateV(dirLight));
+    // }
 
     if (intensity <= 0) {
         return {0, 0, 0};

@@ -149,8 +149,54 @@ std::vector<float> GlRaytracer::cast_ray (
     return {r, g, b};
 }
 
+void GlRaytracer::glLoadModel(string filename,
+    array<float, 3> translate, array<float, 3> rotate, array<float, 3> scale,
+    Material material)
+{
+    std::vector<Triangle> polygons {};
+
+    Obj model = Obj(filename);
+    const Matrix<float, 4, 4> modelMatrix = glCreateObjectMatrix(translate, rotate, scale);
+    const Matrix<float, 4, 4> rotationMatrix = glCreateRotationMatrix(rotate.at(0), rotate.at(1), rotate.at(2));
+
+    //#pragma omp parallel for
+    for (auto &face: model.getFaces()) {
+        int vertCount = face.size();
+        
+        vector<float> t_v0 = model.getVertexes().at( face[0][0] - 1);
+        vector<float> t_v1 = model.getVertexes().at( face[1][0] - 1);
+        vector<float> t_v2 = model.getVertexes().at( face[2][0] - 1);
+
+        vector<float> v0 = glTransform(t_v0, modelMatrix);
+        vector<float> v1 = glTransform(t_v1, modelMatrix);
+        vector<float> v2 = glTransform(t_v2, modelMatrix);
+
+        vector<float> A = glCamTransform(v0);
+        vector<float> B = glCamTransform(v1);
+        vector<float> C = glCamTransform(v2);
+
+        polygons.push_back(Triangle (A, B, C, material));
+
+        if (vertCount == 4) {
+            vector<float> t_v3 = model.getVertexes().at( face[3][0] - 1);
+            vector<float> v3 = glTransform(t_v3, modelMatrix);
+            vector<float> D = glCamTransform(v3);
+
+            polygons.push_back(Triangle (A, C, D, material));
+        }
+    }
+
+    models.push_back( Model (polygons, material) );
+}
+
 void GlRaytracer::glRender ()
 {
+    if (!models.empty()) {
+        for (auto &model : models) {
+            scene.push_back(&model);
+        }
+    }
+
     float aspectRatio = (float) viewport.width / (float) viewport.height;
     float t = tan((fov * M_PI/180) / 2) * nearPlane;
     float r = t * aspectRatio;

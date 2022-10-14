@@ -1,7 +1,7 @@
 #ifndef GLRAYTRACER_H
 #define GLRAYTRACER_H
 
-#include "../glBmpRender.hpp"
+#include "../glRender3D.hpp"
 #include "glFigures.hpp"
 #include "glLights.hpp"
 #include "../glBmp.hpp"
@@ -18,13 +18,14 @@ const int MAX_RECURSION_DEPTH = 3;
 class GlRaytracer;
 static GlRaytracer *glrtx;
 Intersect globalSceneIntersect (GlRaytracer *glrtx, std::vector<float> orig, std::vector<float> dir, Object *sceneObj);
-class GlRaytracer: public GlBmpRender
+class GlRaytracer: public GlRender3D
 {
     protected:
     float fov = 60;
     float nearPlane = 0.1;
 
     vector<float> camPosition {0, 0, 0};
+    vector<Model> models {};
     vector<Object*> scene {};
     vector<Light*> lights {};
     BmpFile envMap = {};
@@ -42,8 +43,11 @@ class GlRaytracer: public GlBmpRender
 
     std::vector<float> cast_ray (std::vector<float> orig, std::vector<float> dir, Object *sceneObj = nullptr, int recursion = 0);
 
-    void glRender ();
+    void glLoadModel(string filename,
+        array<float, 3> translate, array<float, 3> rotate, array<float, 3> scale,
+        Material material);
 
+    void glRender ();
 };
 
 #endif

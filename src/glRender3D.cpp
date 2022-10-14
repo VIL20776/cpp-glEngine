@@ -1,8 +1,4 @@
 #include "../include/glRender3D.hpp"
-//#include <cmath>
-// #include <omp.h>
-
-// void omp_set_dynamic(int);
 
 // Functions
 array<float, 3> GlRender3D::baryCoords (vector<float> A, vector<float> B, vector<float> C, array<float, 2> P)
@@ -338,27 +334,24 @@ void GlRender3D::glLoadModel(string filename,
         vn1 = glDirTransform(vn1, rotationMatrix);
         vn2 = glDirTransform(vn2, rotationMatrix);
 
-        //#pragma omp critical
-        //{
             glTriangle_bc(A, B, C, 
             {v0, v1, v2}, 
             {vt0, vt1, vt2},
             {vn0, vn1, vn2});
 
-            if (vertCount == 4) {
-                vector<float> t_v3 = model.getVertexes().at( face[3][0] - 1);
-                vector<float> v3 = glTransform(t_v3, modelMatrix);
-                vector<float> D = glCamTransform(v3);
-                vector<float> vt3 = model.getTextCoords().at( face[3][1] - 1);
-                vector<float> vn3 = model.getNormals().at( face[3][2] - 1);
-                vn3 = glDirTransform(vn3, rotationMatrix);
+        if (vertCount == 4) {
+            vector<float> t_v3 = model.getVertexes().at( face[3][0] - 1);
+            vector<float> v3 = glTransform(t_v3, modelMatrix);
+            vector<float> D = glCamTransform(v3);
+            vector<float> vt3 = model.getTextCoords().at( face[3][1] - 1);
+            vector<float> vn3 = model.getNormals().at( face[3][2] - 1);
+            vn3 = glDirTransform(vn3, rotationMatrix);
 
-                glTriangle_bc(A, C, D, 
-                {v0, v2, v3}, 
-                {vt0, vt2, vt3},
-                {vn0, vn2, vn3});
-            }
-        //}
+            glTriangle_bc(A, C, D, 
+            {v0, v2, v3}, 
+            {vt0, vt2, vt3},
+            {vn0, vn2, vn3});
+        }
     }
 }
     

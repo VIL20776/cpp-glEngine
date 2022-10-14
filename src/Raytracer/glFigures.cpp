@@ -136,22 +136,22 @@ Intersect MineCube::ray_intersect(std::vector<float> orig, std::vector<float> di
 Triangle::Triangle(std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material) :
     plane({}, {}, material)
 {
-    std::vector<float> temp;
-    if (A.at(1) < B.at(1)) {
-        temp = A;
-        A = B;
-        B = temp;
-    }
-    if (A.at(1) < C.at(1)) {
-        temp = A;
-        A = C;
-        C = temp;
-    }
-    if (B.at(1) < C.at(1)) {
-        temp = B;
-        B = C;
-        C = temp;
-    }
+    // std::vector<float> temp;
+    // if (A.at(1) < B.at(1)) {
+    //     temp = A;
+    //     A = B;
+    //     B = temp;
+    // }
+    // if (A.at(1) < C.at(1)) {
+    //     temp = A;
+    //     A = C;
+    //     C = temp;
+    // }
+    // if (B.at(1) < C.at(1)) {
+    //     temp = B;
+    //     B = C;
+    //     C = temp;
+    // }
 
     this->A = A;
     this->B = B;
@@ -208,4 +208,31 @@ Intersect Triangle::ray_intersect(std::vector<float> orig, std::vector<float> di
     }
 
     return {false, intersect.distance, intersect.point, intersect.normal, this};
+}
+
+Model::Model (std::vector<Triangle> model, Material material)
+{
+    this->model = model;
+    this->material = material;
+}
+
+Intersect Model::ray_intersect(std::vector<float> orig, std::vector<float> dir)
+{
+    Intersect intersect {};
+    float t = INFINITY;
+    for (auto& poly : this->model) {
+        Intersect polyInter = poly.ray_intersect(orig, dir);
+        if (!polyInter.null) {
+            if (polyInter.distance < t) {
+                t = polyInter.distance;
+                intersect = polyInter;
+            }
+        }
+    }
+
+    if (intersect.null) {
+        return intersect;
+    }
+
+    return {false, t, intersect.point, intersect.normal, this};    
 }

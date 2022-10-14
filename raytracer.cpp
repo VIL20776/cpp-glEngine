@@ -5,8 +5,8 @@
 // #include <cstdint>
 
 int main () {
-    const uint32_t width = 1024;
-    const uint32_t height = 1024;
+    const uint32_t width = 256;
+    const uint32_t height = 256;
 
     Material snow {{1, 1, 1}, 16};
     Material stone {{0.4, 0.4, 0.4}, 64, REFLECTIVE};
@@ -17,15 +17,7 @@ int main () {
 
     Material glass {{0.9, 0.9, 0.9}, 64, TRANSPARENT, 1.5};
 
-    Material obama {
-        .spec = 16,
-        .texture = BmpFile ("data/mandala.bmp")
-    };
-
     GlRaytracer rtx {width, height};
-
-    rtx.glClearColor(0.5, 0.5, 0.5);
-    rtx.glClear();
 
     rtx.setEnvMap(BmpFile("data/Raytracer/panoramic-beach.bmp"));
 
@@ -35,17 +27,11 @@ int main () {
     rtx.addLight(&amb_l);
     rtx.addLight(&dir_l);
 
-    Triangle t0 ({2, 1, -10}, {-2, 1, -10}, {0, 5, -10}, grape);
-    Triangle t1 ({0, -3, -10}, {4, -3, -10}, {2, 1, -10}, stone);
-    Triangle t2 ({-4, -3, -10}, {0, -3, -10}, {-2, 1, -10}, orange);
-
-    // Sphere s ({0, 0, -5}, 0.5, obama);
-    // rtx.addObject(&s);
-
-    rtx.addObject(&t0);
-    rtx.addObject(&t1);
-    rtx.addObject(&t2);
-
+    rtx.glLoadModel("data/fox.obj",
+        {0, 0, -20},
+        {0, 45, 0},
+        {0.05, 0.05, 0.05},
+        grape);
 
     rtx.glRender();
 

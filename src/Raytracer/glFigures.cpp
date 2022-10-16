@@ -136,22 +136,22 @@ Intersect MineCube::ray_intersect(std::vector<float> orig, std::vector<float> di
 Triangle::Triangle(std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material) :
     plane({}, {}, material)
 {
-    // std::vector<float> temp;
-    // if (A.at(1) < B.at(1)) {
-    //     temp = A;
-    //     A = B;
-    //     B = temp;
-    // }
-    // if (A.at(1) < C.at(1)) {
-    //     temp = A;
-    //     A = C;
-    //     C = temp;
-    // }
-    // if (B.at(1) < C.at(1)) {
-    //     temp = B;
-    //     B = C;
-    //     C = temp;
-    // }
+    std::vector<float> temp;
+    if (A.at(1) < B.at(1)) {
+        temp = A;
+        A = B;
+        B = temp;
+    }
+    if (A.at(1) < C.at(1)) {
+        temp = A;
+        A = C;
+        C = temp;
+    }
+    if (B.at(1) < C.at(1)) {
+        temp = B;
+        B = C;
+        C = temp;
+    }
 
     this->A = A;
     this->B = B;
@@ -167,7 +167,25 @@ Triangle::Triangle(std::vector<float> A, std::vector<float> B, std::vector<float
 
     this->plane = {center,triangleNormal, material};
 
-    this->material = material;
+    // this->material = material;
+}
+
+Triangle::Triangle (std::vector<float> A, std::vector<float> B, std::vector<float> C,
+    ObjFaceVec verts, Material material): plane({}, {}, material)
+{
+    this->A = A;
+    this->B = B;
+    this->C = C;
+
+    std::vector<float> edge1 = substract(verts.v1, verts.v0);
+    std::vector<float> edge2 = substract(verts.v2, verts.v0);
+
+    std::vector<float> triangleNormal = cross(edge1, edge2);
+    triangleNormal = normalize(triangleNormal);
+
+    std::vector<float> center = divide(add(A, add(B, C)), {3, 3, 3});
+
+    this->plane = {center,triangleNormal, material};
 }
 
 Intersect Triangle::ray_intersect(std::vector<float> orig, std::vector<float> dir)

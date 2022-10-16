@@ -5,8 +5,8 @@
 // #include <cstdint>
 
 int main () {
-    const uint32_t width = 256;
-    const uint32_t height = 256;
+    const uint32_t width = 200;
+    const uint32_t height = 200;
 
     Material snow {{1, 1, 1}, 16};
     Material stone {{0.4, 0.4, 0.4}, 64, REFLECTIVE};
@@ -28,7 +28,7 @@ int main () {
     rtx.addLight(&dir_l);
 
     rtx.glLoadModel("data/fox.obj",
-        {0, 0, -20},
+        {0, 0, -10},
         {0, 45, 0},
         {0.05, 0.05, 0.05},
         grape);

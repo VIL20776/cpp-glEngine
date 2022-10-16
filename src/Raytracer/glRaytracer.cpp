@@ -13,6 +13,8 @@ GlRaytracer::GlRaytracer (uint32_t width, uint32_t height)
     glInit();
     glCreateWindow(width, height);
     glViewPort(0, 0, width, height);
+    glProjectionMatrix(nearPlane, 1000, fov);
+    glViewMatrix();
     glClear();
     glrtx = this;
 }
@@ -142,9 +144,9 @@ std::vector<float> GlRaytracer::cast_ray (
             finalColor = mult(finalColor, texColor);
     }
 
-    float r = std::min((float) 1, finalColor.at(0));
-    float g = std::min((float) 1, finalColor.at(1));
-    float b = std::min((float) 1, finalColor.at(2));
+    float r = std::min(1.0f, finalColor.at(0));
+    float g = std::min(1.0f, finalColor.at(1));
+    float b = std::min(1.0f, finalColor.at(2));
 
     return {r, g, b};
 }
@@ -157,9 +159,7 @@ void GlRaytracer::glLoadModel(string filename,
 
     Obj model = Obj(filename);
     const Matrix<float, 4, 4> modelMatrix = glCreateObjectMatrix(translate, rotate, scale);
-    const Matrix<float, 4, 4> rotationMatrix = glCreateRotationMatrix(rotate.at(0), rotate.at(1), rotate.at(2));
 
-    //#pragma omp parallel for
     for (auto &face: model.getFaces()) {
         int vertCount = face.size();
         
@@ -175,14 +175,14 @@ void GlRaytracer::glLoadModel(string filename,
         vector<float> B = glCamTransform(v1);
         vector<float> C = glCamTransform(v2);
 
-        polygons.push_back(Triangle (A, B, C, material));
+        polygons.push_back(Triangle (A, B, C, {v0, v1, v2}, material));
 
         if (vertCount == 4) {
             vector<float> t_v3 = model.getVertexes().at( face[3][0] - 1);
             vector<float> v3 = glTransform(t_v3, modelMatrix);
             vector<float> D = glCamTransform(v3);
 
-            polygons.push_back(Triangle (A, C, D, material));
+            polygons.push_back(Triangle (A, C, D, {v0, v2, v3}, material));
         }
     }
 

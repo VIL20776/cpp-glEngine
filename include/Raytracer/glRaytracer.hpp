@@ -16,7 +16,7 @@
 const int MAX_RECURSION_DEPTH = 3;
 
 class GlRaytracer;
-static GlRaytracer *glrtx;
+static GlRaytracer *glrtx = nullptr;
 Intersect globalSceneIntersect (GlRaytracer *glrtx, std::vector<float> orig, std::vector<float> dir, Object *sceneObj);
 class GlRaytracer: public GlRender3D
 {

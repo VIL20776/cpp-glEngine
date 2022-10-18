@@ -29,6 +29,14 @@ void GlRaytracer::addObject (Object *object)
     scene.push_back(object);
 }
 
+void GlRaytracer::addAllObjects(std::vector<Object *> objects)
+{
+    for (auto obj: objects)
+    {
+        scene.push_back(obj);
+    }
+}
+
 void GlRaytracer::setEnvMap(BmpFile envMap)
 {
     this->envMap = envMap;
@@ -171,18 +179,14 @@ void GlRaytracer::glLoadModel(string filename,
         vector<float> v1 = glTransform(t_v1, modelMatrix);
         vector<float> v2 = glTransform(t_v2, modelMatrix);
 
-        vector<float> A = glCamTransform(v0);
-        vector<float> B = glCamTransform(v1);
-        vector<float> C = glCamTransform(v2);
-
-        polygons.push_back(Triangle (A, B, C, {v0, v1, v2}, material));
+        polygons.push_back(Triangle (v0, v1, v2, material));
 
         if (vertCount == 4) {
             vector<float> t_v3 = model.getVertexes().at( face[3][0] - 1);
             vector<float> v3 = glTransform(t_v3, modelMatrix);
             vector<float> D = glCamTransform(v3);
 
-            polygons.push_back(Triangle (A, C, D, {v0, v2, v3}, material));
+            polygons.push_back(Triangle (v0, v2, v3, material));
         }
     }
 

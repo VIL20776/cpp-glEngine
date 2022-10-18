@@ -90,8 +90,6 @@ class Triangle: public Object {
     public:
     Triangle (std::vector<float> A, std::vector<float> B, std::vector<float> C, Material material);
 
-    Triangle (std::vector<float> A, std::vector<float> B, std::vector<float> C, ObjFaceVec verts, Material material);
-
     Intersect ray_intersect (std::vector<float> orig, std::vector<float> dir);
 };
 

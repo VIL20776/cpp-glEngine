@@ -13,7 +13,7 @@
 #include <type_traits>
 #include <vector>
 
-const int MAX_RECURSION_DEPTH = 3;
+const int MAX_RECURSION_DEPTH = 4;
 
 class GlRaytracer;
 static GlRaytracer *glrtx = nullptr;
@@ -36,6 +36,8 @@ class GlRaytracer: public GlRender3D
     void addLight (Light *light);
 
     void addObject (Object *object);
+
+    void addAllObjects (std::vector<Object*> objects);
 
     void setEnvMap (BmpFile envMap);
 
